@@ -1,35 +1,72 @@
-# react-native-modal-sheet
+## Installation
 
-My new module
-
-# API documentation
-
-- [Documentation for the main branch](https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/react-native-modal-sheet.md)
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/react-native-modal-sheet/)
-
-# Installation in managed Expo projects
-
-For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](#api-documentation). If you follow the link and there is no documentation available then this library is not yet usable within managed projects &mdash; it is likely to be included in an upcoming Expo SDK release.
-
-# Installation in bare React Native projects
-
-For bare React Native projects, you must ensure that you have [installed and configured the `expo` package](https://docs.expo.dev/bare/installing-expo-modules/) before continuing.
-
-### Add the package to your npm dependencies
-
-```
-npm install react-native-modal-sheet
+```bash
+npm install @corasan/modal-sheet
+yarn add @corasan/modal-sheet
+bun add @corasan/modal-sheet
 ```
 
-### Configure for iOS
+## Usage
 
-Run `npx pod-install` after installing the npm package.
+First, wrap your application with the `ModalSheetProvider` component.
 
+```tsx
+import { ModalSheetProvider } from '@corasan/modal-sheet';
 
-### Configure for Android
+function App() {
+  return (
+    <ModalSheetProvider>
+      <YourApp />
+    </ModalSheetProvider>
+  );
+}
+```
 
+Use `useModalSheet` hook to open and close the modal sheet.
 
+```tsx
+import { useModalSheet } from '@corasan/modal-sheet';
 
-# Contributing
+function YourComponent() {
+  const { open, dismiss } = useModalSheet();
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Butto title="Open Modal Sheet" onClick={() => open())} />
+
+      <ModalSheet>
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <Text style={{ fontWeight: "500", fontSize: 18 }}>Title</Text>
+          </View>
+
+          <View
+            style={{
+              paddingVertical: 40,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              title="Close Modal"
+              onPress={() => {
+                dismiss();
+              }}
+            />
+          </View>
+        </View>
+      </ModalSheet>
+    </View>
+  );
+}
+```
+
+## Props
+
+### ModalSheet
+
+| Name | Type | Default  | Description | Required |
+| --- | --- | --- | --- | --- |
+| children | ReactNode | - | The children components | Kinda |
+| containerStyle | string | - | Styles for the modal sheet container | No |
+| noHandle | boolean | false | Hide the handle | No |
