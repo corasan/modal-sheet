@@ -20,12 +20,24 @@ const Modal = () => {
       />
       <ModalSheet>
         <View style={{ flex: 1 }}>
-          <Button
-            title="Close Modal"
-            onPress={() => {
-              dismiss();
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <Text style={{ fontWeight: "500", fontSize: 18 }}>Modal Title</Text>
+          </View>
+
+          <View
+            style={{
+              paddingVertical: 40,
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
+          >
+            <Button
+              title="Close Modal"
+              onPress={() => {
+                dismiss();
+              }}
+            />
+          </View>
         </View>
       </ModalSheet>
     </View>
