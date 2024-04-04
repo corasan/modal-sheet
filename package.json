@@ -1,9 +1,8 @@
 {
   "name": "@corasan/modal-sheet",
   "version": "1.0.0",
-  "description": "My new module",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "description": "Modal sheet component for React Native. Inspired by the native modal sheet in iOS.",
+  "main": "src/index.ts",
   "scripts": {
     "open:ios": "open -a \"Xcode\" example/ios",
     "open:android": "open -a \"Android Studio\" example/android"
@@ -14,7 +13,10 @@
     "react-native-modal-sheet",
     "@corasan/modal-sheet"
   ],
-  "repository": "https://github.com/corasan/react-native-modal-sheet",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/corasan/react-native-modal-sheet.git"
+  },
   "bugs": {
     "url": "https://github.com/corasan/react-native-modal-sheet/issues"
   },
@@ -33,5 +35,8 @@
   },
   "dependencies": {
     "@gorhom/portal": "^1.0.14"
+  },
+  "directories": {
+    "example": "example"
   }
 }
