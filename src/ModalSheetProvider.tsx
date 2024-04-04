@@ -36,10 +36,10 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const { top } = useSafeAreaInsets();
   const modalRef = useRef(null);
   const animatedStyles = useAnimatedStyle(() => ({
-    borderRadius: interpolate(translateY.value, [HEIGHT, 0], [10, 20]),
+    borderRadius: interpolate(translateY.value, [HEIGHT, 0], [10, 24]),
     transform: [
       {
-        scale: interpolate(translateY.value, [HEIGHT, 0], [1, 0.94]),
+        scale: interpolate(translateY.value, [HEIGHT, 0], [1, 0.95]),
       },
       {
         translateY: interpolate(translateY.value, [HEIGHT, 0], [0, top - 10]),
@@ -52,7 +52,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   }));
 
   const open = () => {
-    translateY.value = withTiming(top + 35);
+    translateY.value = withTiming(top + 20);
   };
   const dismiss = () => {
     translateY.value = withTiming(HEIGHT);

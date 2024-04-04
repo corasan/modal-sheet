@@ -40,7 +40,7 @@ export const ModalSheet = ({
       if (e.absoluteY > 220) {
         translateY.value = withTiming(HEIGHT);
       } else {
-        translateY.value = withTiming(top + 35);
+        translateY.value = withTiming(top + 20);
       }
     });
 
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: 40,
     overflow: "hidden",
   },
   handleContainer: {
@@ -89,9 +89,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   handle: {
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(0,0,0,0.15)",
     height: 5,
-    width: "15%",
+    width: "10%",
     borderRadius: 100,
   },
 });
