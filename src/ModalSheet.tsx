@@ -36,7 +36,6 @@ export const ModalSheet = ({
       translateY.value = e.absoluteY;
     })
     .onEnd((e) => {
-      console.log("end", e.absoluteY);
       if (e.absoluteY > 220) {
         translateY.value = withTiming(HEIGHT);
       } else {
