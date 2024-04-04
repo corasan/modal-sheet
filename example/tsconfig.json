@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "react-native-modal-sheet": ["../src/index"],
+      "react-native-modal-sheet/*": ["../src/*"]
+    }
+  }
+}
