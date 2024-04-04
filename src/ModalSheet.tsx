@@ -1,28 +1,48 @@
 import { Portal } from "@gorhom/portal";
 import { PropsWithChildren } from "react";
-import { Dimensions, View, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  View,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
+  AnimatedStyle,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useModalSheet } from "./ModalSheetProvider";
 
 const HEIGHT = Dimensions.get("window").height;
 
-export const ModalSheet = (props: PropsWithChildren) => {
+export interface ModalSheetProps {
+  containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+  noHandle?: boolean;
+}
+
+export const ModalSheet = ({
+  noHandle = false,
+  ...props
+}: PropsWithChildren<ModalSheetProps>) => {
   const { translateY } = useModalSheet();
-  const gesture = Gesture.Pan().onUpdate((e) => {
-    translateY.value = e.absoluteY;
-  });
-  // .onEnd((e) => {
-  //   if (e.absoluteY > HEIGHT - 100) {
-  //     translateY.value = withTiming(HEIGHT - 100);
-  //   } else {
-  //     translateY.value = withTiming(150);
-  //   }
-  // });
+  const { top } = useSafeAreaInsets();
+
+  const gesture = Gesture.Pan()
+    .onUpdate((e) => {
+      translateY.value = e.absoluteY;
+    })
+    .onEnd((e) => {
+      console.log("end", e.absoluteY);
+      if (e.absoluteY > 220) {
+        translateY.value = withTiming(HEIGHT);
+      } else {
+        translateY.value = withTiming(top + 35);
+      }
+    });
 
   const modalStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -30,26 +50,35 @@ export const ModalSheet = (props: PropsWithChildren) => {
 
   return (
     <Portal hostName="modalSheet">
-      <Animated.View style={[styles.container, modalStyle]}>
+      <Animated.View
+        style={[
+          styles.container,
+          props.containerStyle,
+          styles.permanentContainer,
+          modalStyle,
+        ]}
+      >
         <GestureDetector gesture={gesture}>
           <View style={styles.handleContainer}>
-            <View style={styles.handle} />
+            {!noHandle && <View style={styles.handle} />}
           </View>
         </GestureDetector>
-        <View style={{ flex: 1, paddingTop: 0 }}>{props.children}</View>
+        <View style={{ flex: 1 }}>{props.children}</View>
       </Animated.View>
     </Portal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  permanentContainer: {
     height: HEIGHT,
     width: "100%",
-    backgroundColor: "white",
-    bottom: 0,
     zIndex: 9999,
-    borderRadius: 30,
+    bottom: 0,
+  },
+  container: {
+    backgroundColor: "white",
+    borderRadius: 20,
     overflow: "hidden",
   },
   handleContainer: {
