@@ -3,8 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "react-native-modal-sheet": ["../src/index"],
-      "react-native-modal-sheet/*": ["../src/*"]
+      "@corasan/modal-sheet": ["../src/index"],
+      "@corasan/modal-sheet/*": ["../src/*"]
     }
   }
 }

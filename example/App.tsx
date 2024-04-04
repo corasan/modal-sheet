@@ -1,20 +1,56 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  ModalSheetProvider,
+  ModalSheet,
+  useModalSheet,
+} from "@corasan/modal-sheet";
+import { Button, StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import * as ReactNativeModalSheet from 'react-native-modal-sheet';
+const Modal = () => {
+  const { open, dismiss } = useModalSheet();
+  return (
+    <View style={styles.container}>
+      <Button
+        title="Open Modal"
+        onPress={() => {
+          console.log("PRESSED");
+          open();
+        }}
+      />
+      <ModalSheet>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Close Modal"
+            onPress={() => {
+              dismiss();
+            }}
+          />
+        </View>
+      </ModalSheet>
+    </View>
+  );
+};
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>{ReactNativeModalSheet.hello()}</Text>
-    </View>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ModalSheetProvider>
+          <View style={styles.container}>
+            <Modal />
+          </View>
+        </ModalSheetProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
