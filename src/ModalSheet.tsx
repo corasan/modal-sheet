@@ -1,6 +1,6 @@
 import { Portal } from "@gorhom/portal";
 import { PropsWithChildren } from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions, View, StyleSheet } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -30,31 +30,39 @@ export const ModalSheet = (props: PropsWithChildren) => {
 
   return (
     <Portal hostName="modalSheet">
-      <Animated.View
-        style={[
-          {
-            height: HEIGHT,
-            width: "100%",
-            backgroundColor: "white",
-            bottom: 0,
-            zIndex: 9999,
-            borderRadius: 30,
-            overflow: "hidden",
-          },
-          modalStyle,
-        ]}
-      >
+      <Animated.View style={[styles.container, modalStyle]}>
         <GestureDetector gesture={gesture}>
-          <Animated.View
-            style={{
-              height: 30,
-              width: "100%",
-              backgroundColor: "red",
-            }}
-          />
+          <View style={styles.handleContainer}>
+            <View style={styles.handle} />
+          </View>
         </GestureDetector>
         <View style={{ flex: 1, paddingTop: 0 }}>{props.children}</View>
       </Animated.View>
     </Portal>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    height: HEIGHT,
+    width: "100%",
+    backgroundColor: "white",
+    bottom: 0,
+    zIndex: 9999,
+    borderRadius: 30,
+    overflow: "hidden",
+  },
+  handleContainer: {
+    height: 30,
+    width: "100%",
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  handle: {
+    backgroundColor: "rgba(0,0,0,0.1)",
+    height: 5,
+    width: "15%",
+    borderRadius: 100,
+  },
+});
