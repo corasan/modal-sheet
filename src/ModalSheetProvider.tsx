@@ -1,6 +1,6 @@
 import { PortalProvider } from "@gorhom/portal";
 import { PropsWithChildren, createContext, useContext, useRef } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, Platform, StyleSheet, View } from "react-native";
 import Animated, {
   SharedValue,
   interpolate,
@@ -11,6 +11,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HEIGHT = Dimensions.get("window").height;
+const BORDER_RADIUS = Platform.select({ ios: 10, android: 0 }) ?? 0;
 
 export const ModalSheetContext = createContext<{
   translateY: SharedValue<number>;
@@ -36,13 +37,17 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const { top } = useSafeAreaInsets();
   const modalRef = useRef(null);
   const animatedStyles = useAnimatedStyle(() => ({
-    borderRadius: interpolate(translateY.value, [HEIGHT, 0], [10, 24]),
+    borderRadius: interpolate(
+      translateY.value,
+      [HEIGHT, 0],
+      [BORDER_RADIUS, 24],
+    ),
     transform: [
       {
         scale: interpolate(translateY.value, [HEIGHT, 0], [1, 0.95]),
       },
       {
-        translateY: interpolate(translateY.value, [HEIGHT, 0], [0, top - 10]),
+        translateY: interpolate(translateY.value, [HEIGHT, 0], [-10, top - 10]),
       },
     ],
   }));
