@@ -41,7 +41,9 @@ android/keystores/debug.keystore
 
 # Cocoapods
 #
-example/ios/Pods
+example/ios
+
+example/android
 
 # Ruby
 example/vendor/
