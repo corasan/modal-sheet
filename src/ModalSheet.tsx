@@ -15,6 +15,7 @@ import {
 } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
+  runOnJS,
   useAnimatedStyle,
 } from "react-native-reanimated";
 
@@ -46,11 +47,16 @@ export const ModalSheet = ({
   ...props
 }: PropsWithChildren<ModalSheetProps>) => {
   const { translateY, minimize, open } = useInternalModalSheet();
+
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
       translateY.value = e.absoluteY;
     })
     .onEnd((e) => {
+      if (props.onGestureEnd) {
+        runOnJS(props.onGestureEnd)(e);
+        return;
+      }
       if (e.translationY < 0) {
         open();
       } else {
