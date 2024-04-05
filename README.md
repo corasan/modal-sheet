@@ -70,3 +70,15 @@ function YourComponent() {
 | children | ReactNode | - | The children components | Kinda |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
+| onGestureEnd | (e: PanGestureHandlerEventPayload) => void| - | Custom callback when the gesture ends | No |
+
+## Methods
+
+### useModalSheet
+
+| Name | Type | Description |
+| --- | --- | --- |
+| open | () => void | Open the modal sheet |
+| dismiss | () => void | Dismiss the modal sheet |
+| extend | (height?: number, disableSheetStack?: boolean) => void | Extend to custom height |
+| minimize | (height?: number, disableSheetStack?: boolean) => void | Minimize to custom height |
