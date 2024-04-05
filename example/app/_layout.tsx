@@ -8,7 +8,13 @@ export default function Layout() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ModalSheetProvider>
-          <Stack />
+          <Stack
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: "black",
+              },
+            }}
+          />
         </ModalSheetProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>

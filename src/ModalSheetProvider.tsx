@@ -16,6 +16,8 @@ const DISMISS_VALUE = HEIGHT + 10;
 
 export const ModalSheetContext = createContext<{
   translateY: SharedValue<number>;
+  backdropColor: SharedValue<string>;
+  backdropOpacity: SharedValue<number>;
   open: () => void;
   dismiss: () => void;
   extend: (height?: number, disableSheetStack?: boolean) => void;
@@ -44,6 +46,8 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const translateY = useSharedValue(HEIGHT);
   const disableSheetStackEffect = useSharedValue(false);
   const extendedHeight = useSharedValue(HEIGHT);
+  const backdropColor = useSharedValue("black");
+  const backdropOpacity = useSharedValue(0.4);
   const { top } = useSafeAreaInsets();
   const animatedStyles = useAnimatedStyle(() => {
     if (disableSheetStackEffect.value) return {};
@@ -69,18 +73,24 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         opacity: interpolate(
           translateY.value,
           [HEIGHT, extendedHeight.value],
-          [0, 0.4],
+          [0, backdropOpacity.value],
         ),
         zIndex: interpolate(
           translateY.value,
           [HEIGHT, extendedHeight.value],
           [-99, 999],
         ),
+        backgroundColor: backdropColor.value,
       };
     }
     return {
-      opacity: interpolate(translateY.value, [HEIGHT, 0], [0, 0.4]),
+      opacity: interpolate(
+        translateY.value,
+        [HEIGHT, 0],
+        [0, backdropOpacity.value],
+      ),
       zIndex: interpolate(translateY.value, [HEIGHT, 0], [-99, 999]),
+      backgroundColor: backdropColor.value,
     };
   });
 
@@ -126,6 +136,8 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         dismiss,
         extend,
         minimize,
+        backdropColor,
+        backdropOpacity,
       }}
     >
       <PortalProvider rootHostName="modalSheet">
@@ -156,7 +168,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "black",
     zIndex: 99,
   },
   animatedContainer: {
