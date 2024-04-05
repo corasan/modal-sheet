@@ -1,5 +1,5 @@
 import { Portal } from "@gorhom/portal";
-import { PropsWithChildren, useContext } from "react";
+import { PropsWithChildren, useContext, useEffect } from "react";
 import {
   Dimensions,
   View,
@@ -26,6 +26,8 @@ const HEIGHT = Dimensions.get("window").height;
 export interface ModalSheetProps {
   containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
   noHandle?: boolean;
+  backdropColor?: string;
+  backdropOpacity?: number;
   onGestureEnd?: (
     e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
   ) => void;
@@ -43,10 +45,17 @@ export const useInternalModalSheet = () => {
 
 export const ModalSheet = ({
   noHandle = false,
+  backdropColor,
+  backdropOpacity,
   ...props
 }: PropsWithChildren<ModalSheetProps>) => {
-  const { translateY, minimize, open } = useInternalModalSheet();
-
+  const {
+    translateY,
+    minimize,
+    open,
+    backdropOpacity: bckdropOpacity,
+    backdropColor: bckdropColor,
+  } = useInternalModalSheet();
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
       translateY.value = e.absoluteY;
@@ -62,10 +71,18 @@ export const ModalSheet = ({
         minimize();
       }
     });
-
   const modalStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
+
+  useEffect(() => {
+    if (backdropColor && backdropColor !== "black") {
+      bckdropColor.value = backdropColor;
+    }
+    if (backdropOpacity && backdropOpacity !== 0.4) {
+      bckdropOpacity.value = backdropOpacity;
+    }
+  }, [backdropOpacity, backdropOpacity]);
 
   return (
     <Portal hostName="modalSheet">
