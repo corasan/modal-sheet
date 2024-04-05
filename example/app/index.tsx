@@ -1,14 +1,28 @@
 import { ModalSheet, useModalSheet } from "@corasan/modal-sheet";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
+
+const HEIGHT = Dimensions.get("window").height;
 
 export default function App() {
-  const { open, dismiss } = useModalSheet();
+  const { open, dismiss, extend } = useModalSheet();
   return (
     <View style={styles.container}>
       <Button
         title="Open Modal"
         onPress={() => {
           open();
+        }}
+      />
+      <Button
+        title="Open Half"
+        onPress={() => {
+          extend(HEIGHT / 2, true);
+        }}
+      />
+      <Button
+        title="Open Minimum"
+        onPress={() => {
+          extend(HEIGHT - 150, true);
         }}
       />
       <ModalSheet>
