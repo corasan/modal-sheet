@@ -26,7 +26,6 @@ const HEIGHT = Dimensions.get("window").height;
 export interface ModalSheetProps {
   containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
   noHandle?: boolean;
-  minimizeHeight?: number;
   onGestureEnd?: (
     e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
   ) => void;
