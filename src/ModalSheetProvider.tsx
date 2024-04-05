@@ -102,6 +102,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       extendedHeight.value = height;
       return;
     }
+    disableSheetStackEffect.value = false;
     translateY.value = withTiming(top + 20);
   };
   const minimize = (height?: number, disableSheetStack?: boolean) => {
