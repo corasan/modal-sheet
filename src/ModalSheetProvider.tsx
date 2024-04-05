@@ -69,7 +69,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         opacity: interpolate(
           translateY.value,
           [HEIGHT, extendedHeight.value],
-          [0, 0.1],
+          [0, 0.4],
         ),
         zIndex: interpolate(
           translateY.value,
@@ -79,7 +79,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       };
     }
     return {
-      opacity: interpolate(translateY.value, [HEIGHT, 0], [0, 0.5]),
+      opacity: interpolate(translateY.value, [HEIGHT, 0], [0, 0.4]),
       zIndex: interpolate(translateY.value, [HEIGHT, 0], [-99, 999]),
     };
   });
