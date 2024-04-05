@@ -1,5 +1,5 @@
 import { Portal } from "@gorhom/portal";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useContext } from "react";
 import {
   Dimensions,
   View,
@@ -7,39 +7,54 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import {
+  GestureDetector,
+  Gesture,
+  GestureStateChangeEvent,
+  PanGestureHandlerEventPayload,
+} from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
   useAnimatedStyle,
-  withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useModalSheet } from "./ModalSheetProvider";
+import { ModalSheetContext } from "./ModalSheetProvider";
 
 const HEIGHT = Dimensions.get("window").height;
 
 export interface ModalSheetProps {
   containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
   noHandle?: boolean;
+  minimizeHeight?: number;
+  onGestureEnd?: (
+    e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
+  ) => void;
 }
+
+export const useInternalModalSheet = () => {
+  const context = useContext(ModalSheetContext);
+  if (context === undefined) {
+    throw new Error(
+      "useInternalModalSheet must be used within a ModalSheetProvider",
+    );
+  }
+  return context;
+};
 
 export const ModalSheet = ({
   noHandle = false,
   ...props
 }: PropsWithChildren<ModalSheetProps>) => {
-  const { translateY } = useModalSheet();
-  const { top } = useSafeAreaInsets();
-
+  const { translateY, minimize, open } = useInternalModalSheet();
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
       translateY.value = e.absoluteY;
     })
     .onEnd((e) => {
-      if (e.absoluteY > 220) {
-        translateY.value = withTiming(HEIGHT);
+      if (e.translationY < 0) {
+        open();
       } else {
-        translateY.value = withTiming(top + 20);
+        minimize();
       }
     });
 
