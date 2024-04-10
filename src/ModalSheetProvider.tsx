@@ -5,6 +5,7 @@ import Animated, {
   SharedValue,
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -12,7 +13,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HEIGHT = Dimensions.get("window").height;
 const BORDER_RADIUS = Platform.select({ ios: 10, android: 0 }) ?? 0;
-const DISMISS_VALUE = HEIGHT + 10;
 
 export const ModalSheetContext = createContext<{
   translateY: SharedValue<number>;
@@ -22,6 +22,8 @@ export const ModalSheetContext = createContext<{
   dismiss: () => void;
   extend: (height?: number, disableSheetStack?: boolean) => void;
   minimize: (height?: number, disableSheetStack?: boolean) => void;
+  setMinimumHeight: (height: number) => void;
+  isAtMinimumHeight: SharedValue<boolean>;
 }>({
   // @ts-ignore
   translateY: 0,
@@ -43,13 +45,24 @@ export const useModalSheet = () => {
 };
 
 export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
+  const minimumHeight = useSharedValue(HEIGHT);
   const translateY = useSharedValue(HEIGHT);
+  const dismissValue = useDerivedValue(() => HEIGHT - minimumHeight.value);
+  const isAtMinimumHeight = useDerivedValue(
+    () => translateY.value === dismissValue.value,
+  );
   const disableSheetStackEffect = useSharedValue(false);
   const extendedHeight = useSharedValue(HEIGHT);
   const backdropColor = useSharedValue("black");
-  const backdropOpacity = useSharedValue(0.4);
+  const backdropOpacity = useSharedValue(0.3);
   const { top } = useSafeAreaInsets();
   const animatedStyles = useAnimatedStyle(() => {
+    if (isAtMinimumHeight.value) {
+      return {
+        borderRadius: 0,
+        transform: [{ scale: 1 }],
+      };
+    }
     if (disableSheetStackEffect.value) return {};
     const borderRadius = interpolate(
       translateY.value,
@@ -72,12 +85,12 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       return {
         opacity: interpolate(
           translateY.value,
-          [HEIGHT, extendedHeight.value],
+          [dismissValue.value, extendedHeight.value],
           [0, backdropOpacity.value],
         ),
         zIndex: interpolate(
           translateY.value,
-          [HEIGHT, extendedHeight.value],
+          [dismissValue.value, extendedHeight.value],
           [-99, 999],
         ),
         backgroundColor: backdropColor.value,
@@ -86,10 +99,14 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
     return {
       opacity: interpolate(
         translateY.value,
-        [HEIGHT, 0],
+        [dismissValue.value, 0],
         [0, backdropOpacity.value],
       ),
-      zIndex: interpolate(translateY.value, [HEIGHT, 0], [-99, 999]),
+      zIndex: interpolate(
+        translateY.value,
+        [dismissValue.value, 0],
+        [-99, 999],
+      ),
       backgroundColor: backdropColor.value,
     };
   });
@@ -99,7 +116,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
     translateY.value = withTiming(top + 20);
   };
   const dismiss = () => {
-    translateY.value = withTiming(DISMISS_VALUE);
+    translateY.value = withTiming(dismissValue.value);
   };
 
   const extend = (height?: number, disableSheetStack?: boolean) => {
@@ -125,7 +142,11 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       translateY.value = withTiming(height);
       return;
     }
-    translateY.value = withTiming(DISMISS_VALUE);
+    translateY.value = withTiming(dismissValue.value);
+  };
+  const setMinimumHeight = (height: number) => {
+    minimumHeight.value = height;
+    translateY.value = HEIGHT - height;
   };
 
   return (
@@ -138,6 +159,8 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         minimize,
         backdropColor,
         backdropOpacity,
+        setMinimumHeight,
+        isAtMinimumHeight,
       }}
     >
       <PortalProvider rootHostName="modalSheet">

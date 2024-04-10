@@ -13,6 +13,7 @@ export default function Layout() {
               headerStyle: {
                 backgroundColor: "black",
               },
+              headerTintColor: "white",
             }}
           />
         </ModalSheetProvider>
