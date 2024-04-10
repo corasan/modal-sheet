@@ -26,7 +26,7 @@ export default function App() {
           extend(HEIGHT - 150, true);
         }}
       />
-      <ModalSheet backdropColor="white" backdropOpacity={0.5}>
+      <ModalSheet minimumHeight={200}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Text style={{ fontWeight: "500", fontSize: 18 }}>Modal Title</Text>

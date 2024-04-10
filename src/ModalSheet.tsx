@@ -31,6 +31,7 @@ export interface ModalSheetProps {
   onGestureEnd?: (
     e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
   ) => void;
+  minimumHeight?: number;
 }
 
 export const useInternalModalSheet = () => {
@@ -47,14 +48,17 @@ export const ModalSheet = ({
   noHandle = false,
   backdropColor,
   backdropOpacity,
+  minimumHeight,
   ...props
 }: PropsWithChildren<ModalSheetProps>) => {
   const {
     translateY,
-    minimize,
+    dismiss,
     open,
     backdropOpacity: bckdropOpacity,
     backdropColor: bckdropColor,
+    setMinimumHeight,
+    isAtMinimumHeight,
   } = useInternalModalSheet();
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
@@ -66,13 +70,19 @@ export const ModalSheet = ({
         return;
       }
       if (e.translationY < 0) {
-        open();
+        runOnJS(open)();
       } else {
-        minimize();
+        runOnJS(dismiss)();
       }
     });
   const modalStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
+    ...(isAtMinimumHeight.value && {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -6 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+    }),
   }));
 
   useEffect(() => {
@@ -82,7 +92,10 @@ export const ModalSheet = ({
     if (backdropOpacity && backdropOpacity !== 0.4) {
       bckdropOpacity.value = backdropOpacity;
     }
-  }, [backdropOpacity, backdropOpacity]);
+    if (minimumHeight) {
+      setMinimumHeight?.(minimumHeight);
+    }
+  }, [backdropOpacity, backdropOpacity, minimumHeight]);
 
   return (
     <Portal hostName="modalSheet">
@@ -109,13 +122,10 @@ const styles = StyleSheet.create({
   permanentContainer: {
     height: HEIGHT,
     width: "100%",
-    zIndex: 9999,
-    bottom: 0,
   },
   container: {
     backgroundColor: "white",
     borderRadius: 40,
-    overflow: "hidden",
   },
   handleContainer: {
     height: 30,
