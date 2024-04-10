@@ -70,6 +70,7 @@ function YourComponent() {
 | children | ReactNode | - | The children components | Kinda |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
+| minimumHeight | number | - | The minimum height the modal can be minized | No |
 | onGestureEnd | (e: PanGestureHandlerEventPayload) => void| - | Custom callback when the gesture ends | No |
 
 ## Methods
