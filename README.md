@@ -1,3 +1,6 @@
+> [!WARNING]
+> This package is still in development and not ready for production use. Extremely unstable and may have breaking changes.
+
 ## Installation
 
 ```bash
