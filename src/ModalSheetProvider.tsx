@@ -45,7 +45,9 @@ function interpolateClamp(
 
 export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const minimumHeight = useSharedValue(HEIGHT);
-  const dismissValue = useDerivedValue(() => HEIGHT - minimumHeight.value);
+  const dismissValue = useDerivedValue(
+    () => HEIGHT - (minimumHeight.value === HEIGHT ? 0 : minimumHeight.value),
+  );
   const translateY = useSharedValue(HEIGHT);
   const isAtMinimumHeight = useDerivedValue(
     () => translateY.value === dismissValue.value,
@@ -78,6 +80,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
     };
   });
   const backdropStyles = useAnimatedStyle(() => {
+    if (isAtMinimumHeight.value) return { zIndex: -99, opacity: 0 };
     return {
       opacity: interpolateClamp(
         translateY.value,
@@ -87,7 +90,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       zIndex: interpolateClamp(
         translateY.value,
         [dismissValue.value, HEIGHT / 2],
-        [-99, 999],
+        [-1, 99],
       ),
       backgroundColor: backdropColor.value,
     };
@@ -108,12 +111,12 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       disableSheetStackEffect.value = disableSheetStack;
     }
     if (height) {
-      translateY.value = withTiming(height);
+      translateY.value = withSpring(height, { mass: 0.35 });
       extendedHeight.value = height;
       return;
     }
     disableSheetStackEffect.value = false;
-    translateY.value = withTiming(top + 20);
+    translateY.value = withSpring(top + 20, { mass: 0.35 });
   }, []);
   const minimize = useCallback((height?: number) => {
     "worklet";
