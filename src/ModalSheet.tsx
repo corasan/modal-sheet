@@ -33,6 +33,7 @@ export interface ModalSheetProps {
     e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
   ) => void;
   minimumHeight?: number;
+  disableSheetStackEffect?: boolean;
 }
 
 export const useModalSheet = () => {
@@ -73,6 +74,7 @@ export const ModalSheet = ({
     backdropColor: bckdropColor,
     setMinimumHeight,
     isAtMinimumHeight,
+    disableSheetStackEffect,
   } = useInternalModalSheet();
   const { top } = useSafeAreaInsets();
 
@@ -105,6 +107,7 @@ export const ModalSheet = ({
   }));
 
   useEffect(() => {
+    disableSheetStackEffect.value = !!props.disableSheetStackEffect;
     if (backdropColor && backdropColor !== "black") {
       bckdropColor.value = backdropColor;
     }
@@ -112,9 +115,14 @@ export const ModalSheet = ({
       bckdropOpacity.value = backdropOpacity;
     }
     if (minimumHeight) {
-      setMinimumHeight?.(minimumHeight);
+      setMinimumHeight(minimumHeight);
     }
-  }, [backdropOpacity, backdropOpacity, minimumHeight]);
+  }, [
+    backdropOpacity,
+    backdropOpacity,
+    minimumHeight,
+    props.disableSheetStackEffect,
+  ]);
 
   return (
     <Portal hostName="modalSheet">
