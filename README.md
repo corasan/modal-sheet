@@ -82,5 +82,5 @@ function YourComponent() {
 | --- | --- | --- |
 | open | () => void | Open the modal sheet |
 | dismiss | () => void | Dismiss the modal sheet |
-| extend | (height?: number, disableSheetStack?: boolean) => void | Extend to custom height |
+| expand | (height?: number, disableSheetStack?: boolean) => void | expand to custom height |
 | minimize | (height?: number, disableSheetStack?: boolean) => void | Minimize to custom height |

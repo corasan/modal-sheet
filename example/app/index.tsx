@@ -3,7 +3,7 @@ import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
 
 const HEIGHT = Dimensions.get("window").height;
 export default function App() {
-  const { open, dismiss, extend } = useModalSheet();
+  const { open, dismiss, expand } = useModalSheet();
 
   return (
     <View style={styles.container}>
@@ -16,13 +16,13 @@ export default function App() {
       <Button
         title="Open Half"
         onPress={() => {
-          extend(HEIGHT / 2, true);
+          expand(HEIGHT / 2, true);
         }}
       />
       <Button
         title="Open Minimum"
         onPress={() => {
-          extend(HEIGHT - 150, true);
+          expand(HEIGHT - 150, true);
         }}
       />
       <ModalSheet

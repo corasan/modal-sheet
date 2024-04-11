@@ -44,7 +44,7 @@ export const useModalSheet = () => {
   return {
     open: context.open,
     dismiss: context.dismiss,
-    extend: context.extend,
+    expand: context.expand,
     minimize: context.minimize,
   };
 };

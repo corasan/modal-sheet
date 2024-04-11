@@ -22,7 +22,7 @@ export const ModalSheetContext = createContext<{
   backdropOpacity: SharedValue<number>;
   open: () => void;
   dismiss: () => void;
-  extend: (height?: number, disableSheetStack?: boolean) => void;
+  expand: (height?: number, disableSheetStack?: boolean) => void;
   minimize: (height?: number, disableSheetStack?: boolean) => void;
   setMinimumHeight: (height: number) => void;
   isAtMinimumHeight: SharedValue<boolean>;
@@ -102,7 +102,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
     translateY.value = withTiming(dismissValue.value);
   }, []);
 
-  const extend = useCallback((height?: number, disableSheetStack?: boolean) => {
+  const expand = useCallback((height?: number, disableSheetStack?: boolean) => {
     "worklet";
     if (disableSheetStack !== undefined) {
       disableSheetStackEffect.value = disableSheetStack;
@@ -135,7 +135,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         translateY,
         open,
         dismiss,
-        extend,
+        expand,
         minimize,
         backdropColor,
         backdropOpacity,
