@@ -15,10 +15,7 @@ import {
   GestureUpdateEvent,
   GestureTouchEvent,
 } from "react-native-gesture-handler";
-import Animated, {
-  AnimatedStyle,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ModalSheetContext } from "./ModalSheetProvider";
@@ -28,7 +25,7 @@ const HEIGHT = Dimensions.get("window").height;
 type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
 
 export interface ModalSheetProps {
-  containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+  containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>;
   noHandle?: boolean;
   backdropColor?: string;
   backdropOpacity?: number;

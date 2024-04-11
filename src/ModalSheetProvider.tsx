@@ -98,7 +98,7 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
 
   const open = useCallback(() => {
     "worklet";
-    translateY.value = withSpring(top + 20, { mass: 0.35 });
+    translateY.value = withSpring(top + 20, { mass: 0.32 });
   }, []);
   const dismiss = useCallback(() => {
     "worklet";
@@ -111,12 +111,12 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
       disableSheetStackEffect.value = disableSheetStack;
     }
     if (height) {
-      translateY.value = withSpring(height, { mass: 0.35 });
+      translateY.value = withSpring(height, { mass: 0.32 });
       extendedHeight.value = height;
       return;
     }
     disableSheetStackEffect.value = false;
-    translateY.value = withSpring(top + 20, { mass: 0.35 });
+    translateY.value = withSpring(top + 20, { mass: 0.32 });
   }, []);
   const minimize = useCallback((height?: number) => {
     "worklet";
