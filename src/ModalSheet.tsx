@@ -12,10 +12,11 @@ import {
   Gesture,
   GestureStateChangeEvent,
   PanGestureHandlerEventPayload,
+  GestureUpdateEvent,
+  GestureTouchEvent,
 } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
-  runOnJS,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,16 +25,26 @@ import { ModalSheetContext } from "./ModalSheetProvider";
 
 const HEIGHT = Dimensions.get("window").height;
 
+type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
+
 export interface ModalSheetProps {
   containerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
   noHandle?: boolean;
   backdropColor?: string;
   backdropOpacity?: number;
-  onGestureEnd?: (
-    e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
-  ) => void;
   minimumHeight?: number;
   disableSheetStackEffect?: boolean;
+  onGestureUpdate?: (
+    e: GestureUpdateEvent<PanGestureHandlerEventPayload>,
+  ) => void;
+  onGestureBegin?: (e: GestureEvent) => void;
+  onGestureEnd?: (e: GestureEvent) => void;
+  onGestureStarts?: (e: GestureEvent) => void;
+  onTouchesDown?: (e: GestureTouchEvent) => void;
+  onTouchesUp?: (e: GestureTouchEvent) => void;
+  onTouchesMove?: (e: GestureTouchEvent) => void;
+  onTouchesCancelled?: (e: GestureTouchEvent) => void;
+  onFinalize?: (e: GestureEvent) => void;
 }
 
 export const useModalSheet = () => {
@@ -46,6 +57,7 @@ export const useModalSheet = () => {
     dismiss: context.dismiss,
     expand: context.expand,
     minimize: context.minimize,
+    translateY: context.translateY,
   };
 };
 
@@ -77,9 +89,19 @@ export const ModalSheet = ({
     disableSheetStackEffect,
   } = useInternalModalSheet();
   const { top } = useSafeAreaInsets();
-
   const gesture = Gesture.Pan()
+    .onBegin((e) => props.onGestureBegin?.(e))
+    .onStart((e) => props.onGestureStarts?.(e))
+    .onTouchesDown((e) => props.onTouchesDown?.(e))
+    .onTouchesUp((e) => props.onTouchesUp?.(e))
+    .onTouchesMove((e) => props.onTouchesMove?.(e))
+    .onTouchesCancelled((e) => props.onTouchesCancelled?.(e))
+    .onFinalize((e) => props.onFinalize?.(e))
     .onUpdate((e) => {
+      if (props.onGestureUpdate) {
+        props.onGestureUpdate(e);
+        return;
+      }
       if (e.absoluteY < top) {
         return;
       }
@@ -87,7 +109,7 @@ export const ModalSheet = ({
     })
     .onEnd((e) => {
       if (props.onGestureEnd) {
-        runOnJS(props.onGestureEnd)(e);
+        props.onGestureEnd(e);
         return;
       }
       if (e.translationY < 0) {
