@@ -72,9 +72,17 @@ function YourComponent() {
 | noHandle | boolean | false | Hide the handle | No |
 | minimumHeight | number | - | The minimum height the modal can be minized | No |
 | disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
-| onGestureEnd | (e: PanGestureHandlerEventPayload) => void| - | Custom callback when the gesture ends | No |
+| onGestureUpdate | (e: GestureUpdateEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle gesture updates | No |
+| onGestureBegin | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture begin | No |
+| onGestureEnd | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture end | No |
+| onGestureStart | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture start | No |
+| onGestureFinalize | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture finalize | No |
+| onGestureTouchesDown | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch down | No |
+| onGestureTouchesUp | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch up | No |
+| onGestureTouchesMove | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch move | No |
+| onGestureTouchesCancelled | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch cancelled | No |
 
-## Methods
+## Hooks
 
 ### useModalSheet
 
@@ -83,4 +91,5 @@ function YourComponent() {
 | open | () => void | Open the modal sheet |
 | dismiss | () => void | Dismiss the modal sheet |
 | expand | (height?: number, disableSheetStack?: boolean) => void | expand to custom height |
-| minimize | (height?: number, disableSheetStack?: boolean) => void | Minimize to custom height |
+| minimize | (height?: number) => void | Minimize to custom height |
+| translateY | SharedValue<number> | The animated value for the modal sheet translateY |

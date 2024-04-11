@@ -38,13 +38,13 @@ export interface ModalSheetProps {
     e: GestureUpdateEvent<PanGestureHandlerEventPayload>,
   ) => void;
   onGestureBegin?: (e: GestureEvent) => void;
-  onGestureEnd?: (e: GestureEvent) => void;
   onGestureStarts?: (e: GestureEvent) => void;
-  onTouchesDown?: (e: GestureTouchEvent) => void;
-  onTouchesUp?: (e: GestureTouchEvent) => void;
-  onTouchesMove?: (e: GestureTouchEvent) => void;
-  onTouchesCancelled?: (e: GestureTouchEvent) => void;
-  onFinalize?: (e: GestureEvent) => void;
+  onGestureEnd?: (e: GestureEvent) => void;
+  onGestureFinalize?: (e: GestureEvent) => void;
+  onGestureTouchesDown?: (e: GestureTouchEvent) => void;
+  onGestureTouchesUp?: (e: GestureTouchEvent) => void;
+  onGestureTouchesMove?: (e: GestureTouchEvent) => void;
+  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void;
 }
 
 export const useModalSheet = () => {
@@ -92,11 +92,11 @@ export const ModalSheet = ({
   const gesture = Gesture.Pan()
     .onBegin((e) => props.onGestureBegin?.(e))
     .onStart((e) => props.onGestureStarts?.(e))
-    .onTouchesDown((e) => props.onTouchesDown?.(e))
-    .onTouchesUp((e) => props.onTouchesUp?.(e))
-    .onTouchesMove((e) => props.onTouchesMove?.(e))
-    .onTouchesCancelled((e) => props.onTouchesCancelled?.(e))
-    .onFinalize((e) => props.onFinalize?.(e))
+    .onFinalize((e) => props.onGestureFinalize?.(e))
+    .onTouchesDown((e) => props.onGestureTouchesDown?.(e))
+    .onTouchesUp((e) => props.onGestureTouchesUp?.(e))
+    .onTouchesMove((e) => props.onGestureTouchesMove?.(e))
+    .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
     .onUpdate((e) => {
       if (props.onGestureUpdate) {
         props.onGestureUpdate(e);
