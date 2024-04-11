@@ -1,12 +1,14 @@
 import { PortalProvider } from "@gorhom/portal";
-import { PropsWithChildren, createContext, useContext } from "react";
+import { PropsWithChildren, createContext, useCallback } from "react";
 import { Dimensions, Platform, StyleSheet, View } from "react-native";
 import Animated, {
+  Extrapolation,
   SharedValue,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,10 +22,11 @@ export const ModalSheetContext = createContext<{
   backdropOpacity: SharedValue<number>;
   open: () => void;
   dismiss: () => void;
-  extend: (height?: number, disableSheetStack?: boolean) => void;
+  expand: (height?: number, disableSheetStack?: boolean) => void;
   minimize: (height?: number, disableSheetStack?: boolean) => void;
   setMinimumHeight: (height: number) => void;
   isAtMinimumHeight: SharedValue<boolean>;
+  disableSheetStackEffect: SharedValue<boolean>;
 }>({
   // @ts-ignore
   translateY: 0,
@@ -31,23 +34,19 @@ export const ModalSheetContext = createContext<{
   minimize: () => {},
 });
 
-export const useModalSheet = () => {
-  const context = useContext(ModalSheetContext);
-  if (context === undefined) {
-    throw new Error("useModalSheet must be used within a ModalSheetProvider");
-  }
-  return {
-    open: context.open,
-    dismiss: context.dismiss,
-    extend: context.extend,
-    minimize: context.minimize,
-  };
-};
+function interpolateClamp(
+  value: number,
+  inputRange: number[],
+  outputRange: number[],
+) {
+  "worklet";
+  return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP);
+}
 
 export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const minimumHeight = useSharedValue(HEIGHT);
-  const translateY = useSharedValue(HEIGHT);
   const dismissValue = useDerivedValue(() => HEIGHT - minimumHeight.value);
+  const translateY = useSharedValue(HEIGHT);
   const isAtMinimumHeight = useDerivedValue(
     () => translateY.value === dismissValue.value,
   );
@@ -57,69 +56,53 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   const backdropOpacity = useSharedValue(0.3);
   const { top } = useSafeAreaInsets();
   const animatedStyles = useAnimatedStyle(() => {
-    if (isAtMinimumHeight.value) {
-      return {
-        borderRadius: 0,
-        transform: [{ scale: 1 }],
-      };
-    }
     if (disableSheetStackEffect.value) return {};
-    const borderRadius = interpolate(
+    const borderRadius = interpolateClamp(
       translateY.value,
-      [HEIGHT, 0],
+      [dismissValue.value, 0],
       [BORDER_RADIUS, 24],
     );
-    const scale = interpolate(translateY.value, [HEIGHT, 0], [1, 0.95]);
-    const transformY = interpolate(
+    const scaleX = interpolateClamp(
       translateY.value,
-      [HEIGHT, 0],
-      [-10, top - 10],
+      [dismissValue.value, 0],
+      [1, 0.95],
+    );
+    const scaleY = interpolateClamp(
+      translateY.value,
+      [dismissValue.value, 0],
+      [1, 0.86],
     );
     return {
       borderRadius,
-      transform: [{ scale }, { translateY: transformY }],
+      transform: [{ scaleX }, { scaleY }],
     };
   });
   const backdropStyles = useAnimatedStyle(() => {
-    if (disableSheetStackEffect.value) {
-      return {
-        opacity: interpolate(
-          translateY.value,
-          [dismissValue.value, extendedHeight.value],
-          [0, backdropOpacity.value],
-        ),
-        zIndex: interpolate(
-          translateY.value,
-          [dismissValue.value, extendedHeight.value],
-          [-99, 999],
-        ),
-        backgroundColor: backdropColor.value,
-      };
-    }
     return {
-      opacity: interpolate(
+      opacity: interpolateClamp(
         translateY.value,
-        [dismissValue.value, 0],
+        [dismissValue.value, HEIGHT / 2],
         [0, backdropOpacity.value],
       ),
-      zIndex: interpolate(
+      zIndex: interpolateClamp(
         translateY.value,
-        [dismissValue.value, 0],
+        [dismissValue.value, HEIGHT / 2],
         [-99, 999],
       ),
       backgroundColor: backdropColor.value,
     };
   });
 
-  const open = () => {
-    disableSheetStackEffect.value = false;
-    translateY.value = withTiming(top + 20);
-  };
-  const dismiss = () => {
+  const open = useCallback(() => {
+    "worklet";
+    translateY.value = withSpring(top + 20, { mass: 0.35 });
+  }, []);
+  const dismiss = useCallback(() => {
+    "worklet";
     translateY.value = withTiming(dismissValue.value);
-  };
+  }, []);
 
-  const extend = (height?: number, disableSheetStack?: boolean) => {
+  const expand = useCallback((height?: number, disableSheetStack?: boolean) => {
     "worklet";
     if (disableSheetStack !== undefined) {
       disableSheetStackEffect.value = disableSheetStack;
@@ -131,23 +114,20 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
     }
     disableSheetStackEffect.value = false;
     translateY.value = withTiming(top + 20);
-  };
-  const minimize = (height?: number, disableSheetStack?: boolean) => {
+  }, []);
+  const minimize = useCallback((height?: number) => {
     "worklet";
-    if (disableSheetStack !== undefined) {
-      disableSheetStackEffect.value = disableSheetStack;
-    }
     if (height) {
       extendedHeight.value = height;
       translateY.value = withTiming(height);
       return;
     }
     translateY.value = withTiming(dismissValue.value);
-  };
-  const setMinimumHeight = (height: number) => {
+  }, []);
+  const setMinimumHeight = useCallback((height: number) => {
     minimumHeight.value = height;
     translateY.value = HEIGHT - height;
-  };
+  }, []);
 
   return (
     <ModalSheetContext.Provider
@@ -155,12 +135,13 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
         translateY,
         open,
         dismiss,
-        extend,
+        expand,
         minimize,
         backdropColor,
         backdropOpacity,
         setMinimumHeight,
         isAtMinimumHeight,
+        disableSheetStackEffect,
       }}
     >
       <PortalProvider rootHostName="modalSheet">

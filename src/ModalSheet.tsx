@@ -18,6 +18,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ModalSheetContext } from "./ModalSheetProvider";
 
@@ -32,7 +33,21 @@ export interface ModalSheetProps {
     e: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
   ) => void;
   minimumHeight?: number;
+  disableSheetStackEffect?: boolean;
 }
+
+export const useModalSheet = () => {
+  const context = useContext(ModalSheetContext);
+  if (context === undefined) {
+    throw new Error("useModalSheet must be used within a ModalSheetProvider");
+  }
+  return {
+    open: context.open,
+    dismiss: context.dismiss,
+    expand: context.expand,
+    minimize: context.minimize,
+  };
+};
 
 export const useInternalModalSheet = () => {
   const context = useContext(ModalSheetContext);
@@ -59,9 +74,15 @@ export const ModalSheet = ({
     backdropColor: bckdropColor,
     setMinimumHeight,
     isAtMinimumHeight,
+    disableSheetStackEffect,
   } = useInternalModalSheet();
+  const { top } = useSafeAreaInsets();
+
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
+      if (e.absoluteY < top) {
+        return;
+      }
       translateY.value = e.absoluteY;
     })
     .onEnd((e) => {
@@ -70,9 +91,9 @@ export const ModalSheet = ({
         return;
       }
       if (e.translationY < 0) {
-        runOnJS(open)();
+        open();
       } else {
-        runOnJS(dismiss)();
+        dismiss();
       }
     });
   const modalStyle = useAnimatedStyle(() => ({
@@ -86,6 +107,7 @@ export const ModalSheet = ({
   }));
 
   useEffect(() => {
+    disableSheetStackEffect.value = !!props.disableSheetStackEffect;
     if (backdropColor && backdropColor !== "black") {
       bckdropColor.value = backdropColor;
     }
@@ -93,9 +115,14 @@ export const ModalSheet = ({
       bckdropOpacity.value = backdropOpacity;
     }
     if (minimumHeight) {
-      setMinimumHeight?.(minimumHeight);
+      setMinimumHeight(minimumHeight);
     }
-  }, [backdropOpacity, backdropOpacity, minimumHeight]);
+  }, [
+    backdropOpacity,
+    backdropOpacity,
+    minimumHeight,
+    props.disableSheetStackEffect,
+  ]);
 
   return (
     <Portal hostName="modalSheet">

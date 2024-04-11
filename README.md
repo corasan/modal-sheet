@@ -71,6 +71,7 @@ function YourComponent() {
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
 | minimumHeight | number | - | The minimum height the modal can be minized | No |
+| disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
 | onGestureEnd | (e: PanGestureHandlerEventPayload) => void| - | Custom callback when the gesture ends | No |
 
 ## Methods
@@ -81,5 +82,5 @@ function YourComponent() {
 | --- | --- | --- |
 | open | () => void | Open the modal sheet |
 | dismiss | () => void | Dismiss the modal sheet |
-| extend | (height?: number, disableSheetStack?: boolean) => void | Extend to custom height |
+| expand | (height?: number, disableSheetStack?: boolean) => void | expand to custom height |
 | minimize | (height?: number, disableSheetStack?: boolean) => void | Minimize to custom height |
