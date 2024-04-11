@@ -2,7 +2,6 @@ import { ModalSheet, useModalSheet } from "@corasan/modal-sheet";
 import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
 
 const HEIGHT = Dimensions.get("window").height;
-
 export default function App() {
   const { open, dismiss, extend } = useModalSheet();
 
@@ -26,7 +25,11 @@ export default function App() {
           extend(HEIGHT - 150, true);
         }}
       />
-      <ModalSheet minimumHeight={200}>
+      <ModalSheet
+        backdropColor="white"
+        backdropOpacity={0.5}
+        minimumHeight={200}
+      >
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Text style={{ fontWeight: "500", fontSize: 18 }}>Modal Title</Text>

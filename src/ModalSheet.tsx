@@ -18,6 +18,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ModalSheetContext } from "./ModalSheetProvider";
 
@@ -33,6 +34,19 @@ export interface ModalSheetProps {
   ) => void;
   minimumHeight?: number;
 }
+
+export const useModalSheet = () => {
+  const context = useContext(ModalSheetContext);
+  if (context === undefined) {
+    throw new Error("useModalSheet must be used within a ModalSheetProvider");
+  }
+  return {
+    open: context.open,
+    dismiss: context.dismiss,
+    extend: context.extend,
+    minimize: context.minimize,
+  };
+};
 
 export const useInternalModalSheet = () => {
   const context = useContext(ModalSheetContext);
@@ -60,8 +74,13 @@ export const ModalSheet = ({
     setMinimumHeight,
     isAtMinimumHeight,
   } = useInternalModalSheet();
+  const { top } = useSafeAreaInsets();
+
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
+      if (e.absoluteY < top) {
+        return;
+      }
       translateY.value = e.absoluteY;
     })
     .onEnd((e) => {
@@ -70,9 +89,9 @@ export const ModalSheet = ({
         return;
       }
       if (e.translationY < 0) {
-        runOnJS(open)();
+        open();
       } else {
-        runOnJS(dismiss)();
+        dismiss();
       }
     });
   const modalStyle = useAnimatedStyle(() => ({
