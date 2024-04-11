@@ -112,10 +112,12 @@ export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
   });
 
   const open = () => {
+    "worklet";
     disableSheetStackEffect.value = false;
-    translateY.value = withTiming(top + 20);
+    translateY.value = withSpring(top + 20, { mass: 0.35 });
   };
   const dismiss = () => {
+    "worklet";
     translateY.value = withTiming(dismissValue.value);
   };
 
