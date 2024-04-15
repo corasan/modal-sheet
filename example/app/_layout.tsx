@@ -11,9 +11,9 @@ export default function Layout() {
           <Stack
             screenOptions={{
               headerStyle: {
-                backgroundColor: "black",
+                backgroundColor: "white",
               },
-              headerTintColor: "white",
+              headerTintColor: "black",
             }}
           />
         </ModalSheetProvider>

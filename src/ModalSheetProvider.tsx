@@ -1,6 +1,6 @@
 import { PortalProvider } from "@gorhom/portal";
-import { PropsWithChildren, createContext, useCallback } from "react";
-import { Dimensions, Platform, StyleSheet, View } from "react-native";
+import { PropsWithChildren, useRef, useState } from "react";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Animated, {
   Extrapolation,
   SharedValue,
@@ -8,31 +8,12 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-  withSpring,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const HEIGHT = Dimensions.get("window").height;
-const BORDER_RADIUS = Platform.select({ ios: 10, android: 0 }) ?? 0;
+import { ModalSheetContext } from "./Context";
 
-export const ModalSheetContext = createContext<{
-  translateY: SharedValue<number>;
-  backdropColor: SharedValue<string>;
-  backdropOpacity: SharedValue<number>;
-  open: () => void;
-  dismiss: () => void;
-  expand: (height?: number, disableSheetStack?: boolean) => void;
-  minimize: (height?: number, disableSheetStack?: boolean) => void;
-  setMinimumHeight: (height: number) => void;
-  isAtMinimumHeight: SharedValue<boolean>;
-  disableSheetStackEffect: SharedValue<boolean>;
-}>({
-  // @ts-ignore
-  translateY: 0,
-  modalRef: null,
-  minimize: () => {},
-});
+const HEIGHT = Dimensions.get("window").height;
 
 function interpolateClamp(
   value: number,
@@ -43,131 +24,147 @@ function interpolateClamp(
   return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP);
 }
 
-export const ModalSheetProvider = ({ children }: PropsWithChildren) => {
+type ModalRef = {
+  show: () => void;
+  hide: () => void;
+  translateY: SharedValue<number>;
+  id: string;
+  index: number;
+  [key: string]: any;
+};
+
+const childrenObj = {
+  children: null,
+  show: () => {},
+  hide: () => {},
+  translateY: { value: 0 },
+  scaleX: { value: 1 },
+  borderRadius: { value: 0 },
+  id: "children",
+  index: 0,
+};
+
+export function ModalSheetProvider({ children }: PropsWithChildren) {
+  const { top } = useSafeAreaInsets();
+  const modalRefs = useRef<Record<string, any>>({ children: childrenObj });
+  const [modalStack, setModalStack] = useState<ModalRef[]>([childrenObj]);
   const minimumHeight = useSharedValue(HEIGHT);
+  const y = useSharedValue(HEIGHT);
   const dismissValue = useDerivedValue(
     () => HEIGHT - (minimumHeight.value === HEIGHT ? 0 : minimumHeight.value),
   );
-  const translateY = useSharedValue(HEIGHT);
-  const isAtMinimumHeight = useDerivedValue(
-    () => translateY.value === dismissValue.value,
-  );
-  const disableSheetStackEffect = useSharedValue(false);
-  const extendedHeight = useSharedValue(HEIGHT);
-  const backdropColor = useSharedValue("black");
-  const backdropOpacity = useSharedValue(0.3);
-  const { top } = useSafeAreaInsets();
-  const animatedStyles = useAnimatedStyle(() => {
-    if (disableSheetStackEffect.value) return {};
+  const activeIndex = useSharedValue(0);
+  const childrenAanimatedStyles = useAnimatedStyle(() => {
     const borderRadius = interpolateClamp(
-      translateY.value,
+      y.value,
       [dismissValue.value, 0],
-      [BORDER_RADIUS, 24],
+      [0, 24],
     );
     const scaleX = interpolateClamp(
-      translateY.value,
+      y.value,
       [dismissValue.value, 0],
       [1, 0.95],
     );
-    const scaleY = interpolateClamp(
-      translateY.value,
+    const translateY = interpolateClamp(
+      y.value,
       [dismissValue.value, 0],
-      [1, 0.86],
+      [0, top - 20],
+    );
+    const scaleY = interpolateClamp(
+      y.value,
+      [dismissValue.value, 0],
+      [1, 0.95],
     );
     return {
       borderRadius,
-      transform: [{ scaleX }, { scaleY }],
+      transform: [{ scaleX }, { scaleY }, { translateY }],
     };
   });
   const backdropStyles = useAnimatedStyle(() => {
-    if (isAtMinimumHeight.value) return { zIndex: -99, opacity: 0 };
     return {
-      opacity: interpolateClamp(
-        translateY.value,
-        [dismissValue.value, HEIGHT / 2],
-        [0, backdropOpacity.value],
-      ),
-      zIndex: interpolateClamp(
-        translateY.value,
-        [dismissValue.value, HEIGHT / 2],
-        [-1, 99],
-      ),
-      backgroundColor: backdropColor.value,
+      opacity: interpolateClamp(y.value, [dismissValue.value, 0], [0, 0.4]),
+      zIndex: interpolateClamp(y.value, [dismissValue.value, 0], [0, 99]),
     };
   });
 
-  const open = useCallback(() => {
+  const showModal = (name: string) => {
     "worklet";
-    translateY.value = withSpring(top + 20, { mass: 0.32 });
-  }, []);
-  const dismiss = useCallback(() => {
-    "worklet";
-    translateY.value = withTiming(dismissValue.value);
-  }, []);
+    modalRefs.current[name].show();
+  };
 
-  const expand = useCallback((height?: number, disableSheetStack?: boolean) => {
+  const hideModal = (name: string) => {
     "worklet";
-    if (disableSheetStack !== undefined) {
-      disableSheetStackEffect.value = disableSheetStack;
-    }
-    if (height) {
-      translateY.value = withSpring(height, { mass: 0.32 });
-      extendedHeight.value = height;
-      return;
-    }
-    disableSheetStackEffect.value = false;
-    translateY.value = withSpring(top + 20, { mass: 0.32 });
-  }, []);
-  const minimize = useCallback((height?: number) => {
+    modalRefs.current[name].hide();
+  };
+
+  const registerModal = (modalId: string, ref: any) => {
+    modalRefs.current[modalId] = {
+      ...{
+        ...ref,
+        index: Object.keys(modalRefs.current).length,
+      },
+    };
+  };
+
+  const updateY = (value: number) => {
     "worklet";
-    if (height) {
-      extendedHeight.value = height;
-      translateY.value = withTiming(height);
-      return;
-    }
-    translateY.value = withTiming(dismissValue.value);
-  }, []);
-  const setMinimumHeight = useCallback((height: number) => {
-    minimumHeight.value = height;
-    translateY.value = HEIGHT - height;
-  }, []);
+    y.value = value;
+  };
+
+  const addModalToStack = (modalId: string) => {
+    "worklet";
+    setModalStack((stack) => {
+      activeIndex.value = Object.keys(modalRefs.current).indexOf(modalId);
+      return [...stack, modalRefs.current[modalId]];
+    });
+  };
+  const removeModalFromStack = (modalId: string) => {
+    "worklet";
+    setModalStack((stack) => {
+      const arr = stack.filter((modal) => modal.modalId !== modalId);
+      if (activeIndex.value > 0) {
+        activeIndex.value = activeIndex.value - 1;
+      }
+      return arr;
+    });
+  };
 
   return (
     <ModalSheetContext.Provider
       value={{
-        translateY,
-        open,
-        dismiss,
-        expand,
-        minimize,
-        backdropColor,
-        backdropOpacity,
-        setMinimumHeight,
-        isAtMinimumHeight,
-        disableSheetStackEffect,
+        showModal,
+        hideModal,
+        registerModal,
+        updateY,
+        addModalToStack,
+        removeModalFromStack,
+        activeIndex,
+        modalStack,
       }}
     >
-      <PortalProvider rootHostName="modalSheet">
-        <View style={styles.container}>
-          <Animated.View style={[styles.animatedContainer, animatedStyles]}>
+      <View style={styles.container}>
+        <PortalProvider rootHostName="modalSheet">
+          <Animated.View
+            style={[styles.animatedContainer, childrenAanimatedStyles]}
+          >
             <Animated.View style={[styles.backdrop, backdropStyles]} />
-            {children}
+            <View
+              style={{ flex: 1, backgroundColor: "white", overflow: "hidden" }}
+            >
+              {children}
+            </View>
           </Animated.View>
-        </View>
-      </PortalProvider>
+        </PortalProvider>
+      </View>
     </ModalSheetContext.Provider>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "absolute",
-    top: 0,
-    bottom: -10,
-    left: 0,
-    right: 0,
     backgroundColor: "black",
+    overflow: "hidden",
   },
   backdrop: {
     position: "absolute",
@@ -176,9 +173,11 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 99,
+    backgroundColor: "black",
   },
   animatedContainer: {
     flex: 1,
     overflow: "hidden",
+    backgroundColor: "white",
   },
 });
