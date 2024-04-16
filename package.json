@@ -24,6 +24,7 @@
   "license": "MIT",
   "homepage": "https://github.com/corasan/react-native-modal-sheet#readme",
   "devDependencies": {
+    "@biomejs/biome": "1.7.0",
     "@types/react": "^18.0.25"
   },
   "peerDependencies": {
