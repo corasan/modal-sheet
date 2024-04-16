@@ -1,5 +1,5 @@
 import { PortalProvider } from '@gorhom/portal'
-import { PropsWithChildren, useRef, useState } from 'react'
+import { PropsWithChildren, useCallback, useRef, useState } from 'react'
 import { Dimensions, StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
@@ -21,21 +21,23 @@ function interpolateClamp(value: number, inputRange: number[], outputRange: numb
 }
 
 type ModalRef = {
-  show: () => void
-  hide: () => void
+  open: () => void
+  dismiss: () => void
   translateY: SharedValue<number>
   id: string
   index: number
+  modalHeight: SharedValue<number>
   [key: string]: any
 }
 
 const childrenObj = {
   children: null,
-  show: () => {},
-  hide: () => {},
+  open: () => {},
+  dismiss: () => {},
   translateY: { value: 0 },
   scaleX: { value: 1 },
   borderRadius: { value: 0 },
+  modalHeight: { value: 0 },
   id: 'children',
   index: 0,
 }
@@ -59,7 +61,7 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     if (disableSheetStackEffect.value) {
       return {}
     }
-    const borderRadius = interpolateClamp(y.value, [dismissValue.value, 0], [0, 24])
+    const borderRadius = interpolateClamp(y.value, [HEIGHT, 0], [0, 24])
     const scaleX = interpolateClamp(y.value, [dismissValue.value, 0], [1, 0.95])
     const translateY = interpolateClamp(y.value, [dismissValue.value, 0], [0, top - 20])
     const scaleY = interpolateClamp(y.value, [dismissValue.value, 0], [1, 0.95])
@@ -69,9 +71,6 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     }
   })
   const backdropStyles = useAnimatedStyle(() => {
-    if (isAtMinimumHeight.value) {
-      return { zIndex: -99, opacity: 0 }
-    }
     return {
       opacity: interpolateClamp(y.value, [dismissValue.value, 0], [0, 0.4]),
       zIndex: interpolateClamp(y.value, [dismissValue.value, 0], [0, 99]),
@@ -94,19 +93,41 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
 
   const addModalToStack = (modalId: string) => {
     'worklet'
-    activeIndex.value = Object.keys(modalRefsObj).indexOf(modalId)
-    setModalStack((stack) => [...stack, modalRefsObj[modalId]])
+    setModalStack((stack) => {
+      const arr = [...stack, modalRefsObj[modalId]]
+      activeIndex.value = arr.length - 1
+      return [...stack, modalRefsObj[modalId]]
+    })
   }
   const removeModalFromStack = (modalId: string) => {
     'worklet'
     setModalStack((stack) => {
-      const arr = stack.filter((modal) => modal.modalId !== modalId)
-      if (activeIndex.value > 0) {
-        activeIndex.value = activeIndex.value - 1
-      }
+      const arr = stack.filter((m) => m.id !== modalId)
+      activeIndex.value = arr.length - 1
       return arr
     })
   }
+
+  const open = (name: string) => {
+    'worklet'
+    modalRefs.current[name].open()
+  }
+
+  const dismiss = (name?: string) => {
+    'worklet'
+    if (!name) {
+      name = modalStack[activeIndex.value].id
+    }
+    modalRefsObj[name].dismiss()
+  }
+
+  const expand = useCallback(
+    (name: string, options?: { height?: number; disableSheetEffect?: boolean }) => {
+      'worklet'
+      modalRefs.current[name].expand(options?.height, options?.disableSheetEffect)
+    },
+    [modalRefs],
+  )
 
   return (
     <ModalSheetContext.Provider
@@ -122,6 +143,9 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
         backdropColor,
         backdropOpacity,
         disableSheetStackEffect,
+        expand,
+        open,
+        dismiss,
       }}
     >
       <View style={styles.container}>

@@ -1,6 +1,8 @@
 import { ModalSheet } from '@corasan/modal-sheet'
 import { useRef } from 'react'
-import { Button, StyleSheet, Text, View } from 'react-native'
+import { Button, Dimensions, StyleSheet, Text, View } from 'react-native'
+
+const HEIGHT = Dimensions.get('window').height
 
 export default function App() {
   const modal1 = useRef()
@@ -10,59 +12,77 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Button
-        title="Open Modal 1"
+        title="Modal 1 - open()"
         onPress={() => {
-          modal1.current?.show()
+          modal1.current?.open()
         }}
       />
-      <ModalSheet backdropColor="white" backdropOpacity={0.5} ref={modal1}>
+      <Button
+        title="Modal 1 - expand()"
+        onPress={() => {
+          modal1.current?.expand()
+        }}
+      />
+      <Button
+        title="Modal 1 - expand(HEIGHT / 2)"
+        onPress={() => {
+          modal1.current?.expand(HEIGHT / 3)
+        }}
+      />
+      <ModalSheet
+        name="modal1"
+        backdropColor="white"
+        backdropOpacity={0.5}
+        ref={modal1}
+        minimizedHeight={250}
+      >
         <View style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 1</Text>
           </View>
           <Button
-            title="Close Modal"
+            title="Open Modal 2"
             onPress={() => {
-              modal1.current?.hide()
+              modal2.current?.open()
             }}
           />
           <Button
-            title="Open Modal 2"
+            title="Dismiss Modal"
             onPress={() => {
-              modal2.current?.show()
+              modal1.current?.dismiss()
             }}
           />
         </View>
       </ModalSheet>
 
-      <ModalSheet backdropColor="white" backdropOpacity={0.5} ref={modal2}>
+      <ModalSheet name="modal2" backdropColor="white" backdropOpacity={0.5} ref={modal2}>
         <View style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 2</Text>
           </View>
           <Button
-            title="Close Modal"
+            title="Open Modal 3"
             onPress={() => {
-              modal2.current?.hide()
+              modal3.current?.open()
             }}
           />
           <Button
-            title="Open Modal 3"
+            title="Dismiss Modal"
             onPress={() => {
-              modal3.current?.show()
+              modal2.current?.dismiss()
             }}
           />
         </View>
       </ModalSheet>
-      <ModalSheet backdropColor="white" backdropOpacity={0.5} ref={modal3}>
+      <ModalSheet name="modal3" backdropColor="white" backdropOpacity={0.5} ref={modal3}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
           </View>
           <Button
-            title="Close Modal"
+            title="Dismiss Modal"
             onPress={() => {
-              modal3.current?.hide()
+              modal3.current?.dismiss()
             }}
           />
         </View>

@@ -2,9 +2,9 @@ import { Portal } from '@gorhom/portal'
 import {
   PropsWithChildren,
   forwardRef,
+  useCallback,
   useContext,
   useEffect,
-  useId,
   useImperativeHandle,
   useMemo,
 } from 'react'
@@ -23,17 +23,18 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-  withTiming,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ModalSheetContext } from './Context'
+import { animateClose, animateOpen, interpolateClamp } from './utils'
 
 const HEIGHT = Dimensions.get('window').height
 
 type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
 export interface ModalSheetProps {
+  name: string
   containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>
   noHandle?: boolean
   backdropColor?: string
@@ -59,14 +60,10 @@ export const useInternalModalSheet = () => {
   return context
 }
 
-function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
-  'worklet'
-  return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
-}
-
 export const ModalSheet = forwardRef(
   (
     {
+      name,
       noHandle = false,
       backdropColor,
       backdropOpacity,
@@ -76,8 +73,6 @@ export const ModalSheet = forwardRef(
     }: PropsWithChildren<ModalSheetProps>,
     ref: any,
   ) => {
-    const id = useId()
-    const modalId = `modalSheet-${id}`
     const {
       registerModal,
       addModalToStack,
@@ -126,7 +121,7 @@ export const ModalSheet = forwardRef(
         if (behindModalRef) {
           const val = interpolate(
             e.absoluteY,
-            [HEIGHT, top + 20],
+            [dismissValue.value, top + 20],
             [top + 20, top - 20],
             Extrapolation.CLAMP,
           )
@@ -155,61 +150,81 @@ export const ModalSheet = forwardRef(
             scaleX: scaleX.value,
           },
         ],
-        ...(isAtMinimumHeight.value && {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -6 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-        }),
+      }
+    })
+    const shadowStyle = useAnimatedStyle(() => {
+      return {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: interpolateClamp(
+          translateY.value,
+          [0, minimumHeight.value],
+          [0, 0.08],
+        ),
+        shadowRadius: 8,
+        backdropColor: 'white',
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
       return {
         opacity: interpolateClamp(scaleX.value, [1, 0.95], [0, 0.4]),
-        zIndex: interpolateClamp(scaleX.value, [1, 0.95], [0, 999]),
+        zIndex: interpolateClamp(scaleX.value, [1, 0.95], [0, 99]),
       }
     })
 
-    const show = () => {
-      translateY.value = withTiming(top + 15)
+    const open = () => {
+      translateY.value = animateOpen(top + 10)
       if (activeIndex.value === 0) {
-        updateY(withTiming(top + 15))
+        updateY(animateOpen(top + 10))
       }
-      addModalToStack(modalId)
+      addModalToStack(name)
       // // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value]
       if (behindModalRef) {
-        behindModalRef.translateY.value = withTiming(top - 5)
-        behindModalRef.scaleX.value = withTiming(0.95)
-        behindModalRef.borderRadius.value = withTiming(24)
+        behindModalRef.translateY.value = animateClose(top - 5)
+        behindModalRef.scaleX.value = animateClose(0.96)
+        behindModalRef.borderRadius.value = animateClose(24)
       }
     }
-    const hide = () => {
-      translateY.value = withTiming(HEIGHT - (minimizedHeight ?? 0))
+
+    const expand = useCallback((height?: number) => {
+      'worklet'
+      if (height) {
+        translateY.value = animateOpen(height)
+        minimumHeight.value = height
+        return
+      }
+      open()
+    }, [])
+
+    const dismiss = () => {
+      translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
       if (activeIndex.value === 1) {
-        updateY(withTiming(HEIGHT - (minimizedHeight ?? 0)))
+        updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
       }
       // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value - 1]
       if (behindModalRef) {
-        behindModalRef.translateY.value = withTiming(top + 20)
-        behindModalRef.scaleX.value = withTiming(1)
-        behindModalRef.borderRadius.value = withTiming(40)
+        behindModalRef.translateY.value = animateClose(top + 20)
+        behindModalRef.scaleX.value = animateClose(1)
+        behindModalRef.borderRadius.value = animateClose(40)
       }
-      removeModalFromStack(modalId)
+      removeModalFromStack(name)
     }
     useImperativeHandle(ref, () => ({
-      show,
-      hide,
+      open,
+      dismiss,
       translateY,
       scaleX,
       borderRadius,
-      id: modalId,
+      minimizedHeight,
+      id: name,
+      expand,
     }))
 
     useEffect(() => {
-      registerModal(modalId, ref.current)
-    }, [modalId, ref])
+      registerModal(name, ref.current)
+    }, [name, ref])
 
     useEffect(() => {
       disableSheetStackEffect.value = !!props.disableSheetStackEffect
@@ -221,27 +236,29 @@ export const ModalSheet = forwardRef(
       }
       if (minimizedHeight) {
         minimumHeight.value = minimizedHeight
-        translateY.value = withTiming(HEIGHT - minimizedHeight)
+        translateY.value = animateClose(HEIGHT - minimizedHeight)
       }
     }, [backdropOpacity, backdropOpacity, minimizedHeight, props.disableSheetStackEffect])
 
     return (
       <Portal hostName="modalSheet">
-        <Animated.View
-          style={[
-            styles.container,
-            props.containerStyle,
-            styles.permanentContainer,
-            modalStyle,
-          ]}
-        >
-          <Animated.View style={[styles.backdrop, backdropStyles]} />
-          <GestureDetector gesture={gesture}>
-            <View style={styles.handleContainer}>
-              {!noHandle && <View style={styles.handle} />}
-            </View>
-          </GestureDetector>
-          <View style={{ flex: 1 }}>{children}</View>
+        <Animated.View style={shadowStyle}>
+          <Animated.View
+            style={[
+              styles.container,
+              props.containerStyle,
+              styles.permanentContainer,
+              modalStyle,
+            ]}
+          >
+            <Animated.View style={[styles.backdrop, backdropStyles]} />
+            <GestureDetector gesture={gesture}>
+              <View style={styles.handleContainer}>
+                {!noHandle && <View style={styles.handle} />}
+              </View>
+            </GestureDetector>
+            <View style={{ flex: 1 }}>{children}</View>
+          </Animated.View>
         </Animated.View>
       </Portal>
     )
@@ -254,6 +271,7 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'absolute',
     bottom: 0,
+    overflow: 'hidden',
   },
   container: {
     backgroundColor: 'white',
