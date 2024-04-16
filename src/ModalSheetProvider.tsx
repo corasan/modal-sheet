@@ -50,8 +50,15 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
   const dismissValue = useDerivedValue(
     () => HEIGHT - (minimumHeight.value === HEIGHT ? 0 : minimumHeight.value),
   )
+  const isAtMinimumHeight = useDerivedValue(() => y.value === dismissValue.value)
+  const disableSheetStackEffect = useSharedValue(false)
+  const backdropColor = useSharedValue('black')
+  const backdropOpacity = useSharedValue(0.3)
   const activeIndex = useSharedValue(0)
   const childrenAanimatedStyles = useAnimatedStyle(() => {
+    if (disableSheetStackEffect.value) {
+      return {}
+    }
     const borderRadius = interpolateClamp(y.value, [dismissValue.value, 0], [0, 24])
     const scaleX = interpolateClamp(y.value, [dismissValue.value, 0], [1, 0.95])
     const translateY = interpolateClamp(y.value, [dismissValue.value, 0], [0, top - 20])
@@ -62,6 +69,9 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     }
   })
   const backdropStyles = useAnimatedStyle(() => {
+    if (isAtMinimumHeight.value) {
+      return { zIndex: -99, opacity: 0 }
+    }
     return {
       opacity: interpolateClamp(y.value, [dismissValue.value, 0], [0, 0.4]),
       zIndex: interpolateClamp(y.value, [dismissValue.value, 0], [0, 99]),
@@ -107,6 +117,11 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
         removeModalFromStack,
         activeIndex,
         modalStack,
+        isAtMinimumHeight,
+        minimumHeight,
+        backdropColor,
+        backdropOpacity,
+        disableSheetStackEffect,
       }}
     >
       <View style={styles.container}>

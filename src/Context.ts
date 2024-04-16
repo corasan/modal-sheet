@@ -4,15 +4,15 @@ import { SharedValue } from 'react-native-reanimated'
 export const ModalSheetContext = createContext<{
   // setMinimumHeight: (height: number) => void;
   // translateY: SharedValue<number>;
-  // backdropColor: SharedValue<string>;
-  // backdropOpacity: SharedValue<number>;
   // open: () => void;
   // dismiss: () => void;
   // expand: (height?: number, disableSheetStack?: boolean) => void;
   // minimize: (height?: number, disableSheetStack?: boolean) => void;
-  // isAtMinimumHeight: SharedValue<boolean>;
-  // disableSheetStackEffect: SharedValue<boolean>;
-  // y: SharedValue<number>;
+  minimumHeight: SharedValue<number>
+  backdropColor: SharedValue<string>
+  backdropOpacity: SharedValue<number>
+  isAtMinimumHeight: SharedValue<boolean>
+  disableSheetStackEffect: SharedValue<boolean>
   registerModal: (id: string, ref: any) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
@@ -26,6 +26,11 @@ export const ModalSheetContext = createContext<{
   removeModalFromStack: () => {},
   activeIndex: { value: 0 },
   modalStack: [],
+  isAtMinimumHeight: { value: false },
+  minimumHeight: { value: 0 },
+  backdropColor: { value: 'black' },
+  backdropOpacity: { value: 0.3 },
+  disableSheetStackEffect: { value: false },
   // y: { value: 0 },
   // setMinimumHeight: () => {},
   // @ts-ignore

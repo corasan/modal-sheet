@@ -21,6 +21,7 @@ import Animated, {
   Extrapolation,
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
@@ -37,7 +38,7 @@ export interface ModalSheetProps {
   noHandle?: boolean
   backdropColor?: string
   backdropOpacity?: number
-  minimumHeight?: number
+  minimizedHeight?: number
   disableSheetStackEffect?: boolean
   onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
   onGestureBegin?: (e: GestureEvent) => void
@@ -69,7 +70,7 @@ export const ModalSheet = forwardRef(
       noHandle = false,
       backdropColor,
       backdropOpacity,
-      minimumHeight,
+      minimizedHeight,
       children,
       ...props
     }: PropsWithChildren<ModalSheetProps>,
@@ -84,8 +85,20 @@ export const ModalSheet = forwardRef(
       activeIndex,
       modalStack,
       updateY,
+      disableSheetStackEffect,
+      minimumHeight,
+      backdropColor: bckdropColor,
+      backdropOpacity: bckdropOpacity,
+      isAtMinimumHeight: sharedIsMinimumHeight,
     } = useContext(ModalSheetContext)
     const translateY = useSharedValue(HEIGHT)
+    const dismissValue = useDerivedValue(
+      () => HEIGHT - (!minimizedHeight ? 0 : minimizedHeight),
+    )
+    const isAtMinimumHeight = useDerivedValue(
+      () => translateY.value === dismissValue.value,
+    )
+    sharedIsMinimumHeight.value = isAtMinimumHeight.value
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const { top } = useSafeAreaInsets()
@@ -142,11 +155,12 @@ export const ModalSheet = forwardRef(
             scaleX: scaleX.value,
           },
         ],
-        // ...(isAtMinimumHeight.value && {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -6 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
+        ...(isAtMinimumHeight.value && {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        }),
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -171,9 +185,9 @@ export const ModalSheet = forwardRef(
       }
     }
     const hide = () => {
-      translateY.value = withTiming(HEIGHT - (minimumHeight ?? 0))
+      translateY.value = withTiming(HEIGHT - (minimizedHeight ?? 0))
       if (activeIndex.value === 1) {
-        updateY(withTiming(HEIGHT - (minimumHeight ?? 0)))
+        updateY(withTiming(HEIGHT - (minimizedHeight ?? 0)))
       }
       // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value - 1]
@@ -196,6 +210,20 @@ export const ModalSheet = forwardRef(
     useEffect(() => {
       registerModal(modalId, ref.current)
     }, [modalId, ref])
+
+    useEffect(() => {
+      disableSheetStackEffect.value = !!props.disableSheetStackEffect
+      if (backdropColor && backdropColor !== 'black') {
+        bckdropColor.value = backdropColor
+      }
+      if (backdropOpacity && backdropOpacity !== 0.4) {
+        bckdropOpacity.value = backdropOpacity
+      }
+      if (minimizedHeight) {
+        minimumHeight.value = minimizedHeight
+        translateY.value = withTiming(HEIGHT - minimizedHeight)
+      }
+    }, [backdropOpacity, backdropOpacity, minimizedHeight, props.disableSheetStackEffect])
 
     return (
       <Portal hostName="modalSheet">
@@ -226,7 +254,6 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'absolute',
     bottom: 0,
-    overflow: 'hidden',
   },
   container: {
     backgroundColor: 'white',
