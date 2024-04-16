@@ -1,4 +1,4 @@
-import { Portal } from "@gorhom/portal";
+import { Portal } from '@gorhom/portal'
 import {
   PropsWithChildren,
   forwardRef,
@@ -6,14 +6,9 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
-} from "react";
-import {
-  Dimensions,
-  View,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-} from "react-native";
+  useMemo,
+} from 'react'
+import { Dimensions, View, StyleSheet, StyleProp, ViewStyle } from 'react-native'
 import {
   GestureDetector,
   Gesture,
@@ -21,59 +16,51 @@ import {
   PanGestureHandlerEventPayload,
   GestureUpdateEvent,
   GestureTouchEvent,
-} from "react-native-gesture-handler";
+} from 'react-native-gesture-handler'
 import Animated, {
   Extrapolation,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { ModalSheetContext } from "./Context";
+import { ModalSheetContext } from './Context'
 
-const HEIGHT = Dimensions.get("window").height;
+const HEIGHT = Dimensions.get('window').height
 
-type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
+type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
 export interface ModalSheetProps {
-  containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>;
-  noHandle?: boolean;
-  backdropColor?: string;
-  backdropOpacity?: number;
-  minimumHeight?: number;
-  disableSheetStackEffect?: boolean;
-  onGestureUpdate?: (
-    e: GestureUpdateEvent<PanGestureHandlerEventPayload>,
-  ) => void;
-  onGestureBegin?: (e: GestureEvent) => void;
-  onGestureStarts?: (e: GestureEvent) => void;
-  onGestureEnd?: (e: GestureEvent) => void;
-  onGestureFinalize?: (e: GestureEvent) => void;
-  onGestureTouchesDown?: (e: GestureTouchEvent) => void;
-  onGestureTouchesUp?: (e: GestureTouchEvent) => void;
-  onGestureTouchesMove?: (e: GestureTouchEvent) => void;
-  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void;
+  containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>
+  noHandle?: boolean
+  backdropColor?: string
+  backdropOpacity?: number
+  minimumHeight?: number
+  disableSheetStackEffect?: boolean
+  onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
+  onGestureBegin?: (e: GestureEvent) => void
+  onGestureStarts?: (e: GestureEvent) => void
+  onGestureEnd?: (e: GestureEvent) => void
+  onGestureFinalize?: (e: GestureEvent) => void
+  onGestureTouchesDown?: (e: GestureTouchEvent) => void
+  onGestureTouchesUp?: (e: GestureTouchEvent) => void
+  onGestureTouchesMove?: (e: GestureTouchEvent) => void
+  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
 }
 
 export const useInternalModalSheet = () => {
-  const context = useContext(ModalSheetContext);
+  const context = useContext(ModalSheetContext)
   if (context === undefined) {
-    throw new Error(
-      "useInternalModalSheet must be used within a ModalSheetProvider",
-    );
+    throw new Error('useInternalModalSheet must be used within a ModalSheetProvider')
   }
-  return context;
-};
+  return context
+}
 
-function interpolateClamp(
-  value: number,
-  inputRange: number[],
-  outputRange: number[],
-) {
-  "worklet";
-  return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP);
+function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
+  'worklet'
+  return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
 }
 
 export const ModalSheet = forwardRef(
@@ -83,12 +70,13 @@ export const ModalSheet = forwardRef(
       backdropColor,
       backdropOpacity,
       minimumHeight,
+      children,
       ...props
     }: PropsWithChildren<ModalSheetProps>,
     ref: any,
   ) => {
-    const id = useId();
-    const modalId = `modalSheet-${id}`;
+    const id = useId()
+    const modalId = `modalSheet-${id}`
     const {
       registerModal,
       addModalToStack,
@@ -96,11 +84,15 @@ export const ModalSheet = forwardRef(
       activeIndex,
       modalStack,
       updateY,
-    } = useContext(ModalSheetContext);
-    const translateY = useSharedValue(HEIGHT);
-    const scaleX = useSharedValue(1);
-    const borderRadius = useSharedValue(40);
-    const { top } = useSafeAreaInsets();
+    } = useContext(ModalSheetContext)
+    const translateY = useSharedValue(HEIGHT)
+    const scaleX = useSharedValue(1)
+    const borderRadius = useSharedValue(40)
+    const { top } = useSafeAreaInsets()
+    const behindModalRef = useMemo(
+      () => modalStack[activeIndex.value - 1],
+      [activeIndex.value, modalStack],
+    )
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
@@ -111,35 +103,34 @@ export const ModalSheet = forwardRef(
       .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
       .onUpdate((e) => {
         if (props.onGestureUpdate) {
-          props.onGestureUpdate(e);
-          return;
+          props.onGestureUpdate(e)
+          return
         }
         if (e.absoluteY < top) {
-          return;
+          return
         }
-        translateY.value = e.absoluteY;
-        const behindModalRef = modalStack[activeIndex.value - 1];
+        translateY.value = e.absoluteY
         if (behindModalRef) {
           const val = interpolate(
             e.absoluteY,
             [HEIGHT, top + 20],
             [top + 20, top - 20],
             Extrapolation.CLAMP,
-          );
-          behindModalRef.translateY.value = val;
+          )
+          behindModalRef.translateY.value = val
         }
       })
       .onEnd((e) => {
         if (props.onGestureEnd) {
-          props.onGestureEnd(e);
-          return;
+          props.onGestureEnd(e)
+          return
         }
         if (e.translationY < 0) {
           // open();
         } else {
           // dismiss();
         }
-      });
+      })
     const modalStyle = useAnimatedStyle(() => {
       return {
         borderRadius: borderRadius.value,
@@ -152,47 +143,47 @@ export const ModalSheet = forwardRef(
           },
         ],
         // ...(isAtMinimumHeight.value && {
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: -6 },
         shadowOpacity: 0.05,
         shadowRadius: 8,
-      };
-    });
+      }
+    })
     const backdropStyles = useAnimatedStyle(() => {
       return {
         opacity: interpolateClamp(scaleX.value, [1, 0.95], [0, 0.4]),
         zIndex: interpolateClamp(scaleX.value, [1, 0.95], [0, 999]),
-      };
-    });
+      }
+    })
 
     const show = () => {
-      translateY.value = withTiming(top + 15);
+      translateY.value = withTiming(top + 15)
       if (activeIndex.value === 0) {
-        updateY(withTiming(top + 15));
+        updateY(withTiming(top + 15))
       }
-      addModalToStack(modalId);
-      // Animate the modal behind
-      const behindModalRef = modalStack[activeIndex.value];
+      addModalToStack(modalId)
+      // // Animate the modal behind
+      const behindModalRef = modalStack[activeIndex.value]
       if (behindModalRef) {
-        behindModalRef.translateY.value = withTiming(top - 5);
-        behindModalRef.scaleX.value = withTiming(0.95);
-        behindModalRef.borderRadius.value = withTiming(24);
+        behindModalRef.translateY.value = withTiming(top - 5)
+        behindModalRef.scaleX.value = withTiming(0.95)
+        behindModalRef.borderRadius.value = withTiming(24)
       }
-    };
+    }
     const hide = () => {
-      translateY.value = withTiming(HEIGHT - (minimumHeight ?? 0));
+      translateY.value = withTiming(HEIGHT - (minimumHeight ?? 0))
       if (activeIndex.value === 1) {
-        updateY(withTiming(HEIGHT - (minimumHeight ?? 0)));
+        updateY(withTiming(HEIGHT - (minimumHeight ?? 0)))
       }
       // Animate the modal behind
-      const behindModalRef = modalStack[activeIndex.value - 1];
+      const behindModalRef = modalStack[activeIndex.value - 1]
       if (behindModalRef) {
-        behindModalRef.translateY.value = withTiming(top + 20);
-        behindModalRef.scaleX.value = withTiming(1);
-        behindModalRef.borderRadius.value = withTiming(40);
+        behindModalRef.translateY.value = withTiming(top + 20)
+        behindModalRef.scaleX.value = withTiming(1)
+        behindModalRef.borderRadius.value = withTiming(40)
       }
-      removeModalFromStack(modalId);
-    };
+      removeModalFromStack(modalId)
+    }
     useImperativeHandle(ref, () => ({
       show,
       hide,
@@ -200,11 +191,11 @@ export const ModalSheet = forwardRef(
       scaleX,
       borderRadius,
       id: modalId,
-    }));
+    }))
 
     useEffect(() => {
-      registerModal(modalId, ref.current);
-    }, [modalId, ref]);
+      registerModal(modalId, ref.current)
+    }, [modalId, ref])
 
     return (
       <Portal hostName="modalSheet">
@@ -222,45 +213,45 @@ export const ModalSheet = forwardRef(
               {!noHandle && <View style={styles.handle} />}
             </View>
           </GestureDetector>
-          <View style={{ flex: 1 }}>{props.children}</View>
+          <View style={{ flex: 1 }}>{children}</View>
         </Animated.View>
       </Portal>
-    );
+    )
   },
-);
+)
 
 const styles = StyleSheet.create({
   permanentContainer: {
     height: HEIGHT,
-    width: "100%",
-    position: "absolute",
+    width: '100%',
+    position: 'absolute',
     bottom: 0,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   container: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 40,
   },
   handleContainer: {
     height: 30,
-    width: "100%",
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '100%',
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   handle: {
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: 'rgba(0,0,0,0.15)',
     height: 5,
-    width: "10%",
+    width: '10%',
     borderRadius: 100,
   },
   backdrop: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 0,
-    backgroundColor: "black",
+    backgroundColor: 'black',
   },
-});
+})
