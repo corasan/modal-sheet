@@ -15,7 +15,7 @@ export const ModalSheetContext = createContext<{
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
   isAtMinimumHeight: SharedValue<boolean>
-  disableSheetStackEffect: SharedValue<boolean>
+  disableSheetStackEffect: SharedValue<1 | 0>
   registerModal: (id: string, ref: any) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
@@ -33,7 +33,7 @@ export const ModalSheetContext = createContext<{
   minimumHeight: { value: 0 },
   backdropColor: { value: 'black' },
   backdropOpacity: { value: 0.3 },
-  disableSheetStackEffect: { value: false },
+  disableSheetStackEffect: { value: 0 },
   expand: () => {},
   open: () => {},
   dismiss: () => {},

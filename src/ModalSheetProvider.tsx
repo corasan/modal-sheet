@@ -53,12 +53,12 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     () => HEIGHT - (minimumHeight.value === HEIGHT ? 0 : minimumHeight.value),
   )
   const isAtMinimumHeight = useDerivedValue(() => y.value === dismissValue.value)
-  const disableSheetStackEffect = useSharedValue(false)
+  const disableSheetStackEffect = useSharedValue<1 | 0>(0)
   const backdropColor = useSharedValue('black')
   const backdropOpacity = useSharedValue(0.3)
   const activeIndex = useSharedValue(0)
   const childrenAanimatedStyles = useAnimatedStyle(() => {
-    if (disableSheetStackEffect.value) {
+    if (disableSheetStackEffect.value === 1) {
       return {}
     }
     const borderRadius = interpolateClamp(y.value, [HEIGHT, 0], [0, 24])
@@ -92,7 +92,6 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
   }
 
   const addModalToStack = (modalId: string) => {
-    'worklet'
     setModalStack((stack) => {
       const arr = [...stack, modalRefsObj[modalId]]
       activeIndex.value = arr.length - 1
@@ -100,7 +99,6 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     })
   }
   const removeModalFromStack = (modalId: string) => {
-    'worklet'
     setModalStack((stack) => {
       const arr = stack.filter((m) => m.id !== modalId)
       activeIndex.value = arr.length - 1

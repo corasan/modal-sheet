@@ -20,6 +20,7 @@ import {
 import Animated, {
   Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -97,15 +98,15 @@ export const ModalSheet = forwardRef(
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const { top } = useSafeAreaInsets()
-    const behindModalRef = useMemo(
-      () => modalStack[activeIndex.value - 1],
-      [activeIndex.value, modalStack],
-    )
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
       .onFinalize((e) => props.onGestureFinalize?.(e))
-      .onTouchesDown((e) => props.onGestureTouchesDown?.(e))
+      .onTouchesDown((e) => {
+        if (props.onGestureTouchesDown) {
+          runOnJS(props.onGestureTouchesDown)(e)
+        }
+      })
       .onTouchesUp((e) => props.onGestureTouchesUp?.(e))
       .onTouchesMove((e) => props.onGestureTouchesMove?.(e))
       .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
@@ -118,27 +119,43 @@ export const ModalSheet = forwardRef(
           return
         }
         translateY.value = e.absoluteY
+        if (!disableSheetStackEffect.value) {
+          updateY(e.absoluteY)
+        }
+        const behindModalRef = modalStack[activeIndex.value - 1]
         if (behindModalRef) {
-          const val = interpolate(
+          const val = interpolateClamp(
             e.absoluteY,
-            [dismissValue.value, top + 20],
-            [top + 20, top - 20],
-            Extrapolation.CLAMP,
+            [HEIGHT, top + 20],
+            [top + 20, top - 5],
           )
           behindModalRef.translateY.value = val
+          behindModalRef.scaleX.value = interpolate(
+            e.absoluteY,
+            [dismissValue.value, top + 20],
+            [1, 0.96],
+            Extrapolation.CLAMP,
+          )
         }
       })
       .onEnd((e) => {
         if (props.onGestureEnd) {
-          props.onGestureEnd(e)
+          runOnJS(props.onGestureEnd)(e)
           return
         }
         if (e.translationY < 0) {
-          // open();
+          translateY.value = animateOpen(top + 10)
+          if (activeIndex.value === 0) {
+            updateY(animateOpen(top + 10))
+          }
+          runOnJS(addModalToStack)(name)
         } else {
-          // dismiss();
+          translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
+          updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
+          runOnJS(removeModalFromStack)(name)
         }
       })
+
     const modalStyle = useAnimatedStyle(() => {
       return {
         borderRadius: borderRadius.value,
@@ -187,16 +204,6 @@ export const ModalSheet = forwardRef(
       }
     }
 
-    const expand = useCallback((height?: number) => {
-      'worklet'
-      if (height) {
-        translateY.value = animateOpen(height)
-        minimumHeight.value = height
-        return
-      }
-      open()
-    }, [])
-
     const dismiss = () => {
       translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
       if (activeIndex.value === 1) {
@@ -211,6 +218,38 @@ export const ModalSheet = forwardRef(
       }
       removeModalFromStack(name)
     }
+
+    const expand = useCallback((height?: number, disableSheetEffect?: boolean) => {
+      'worklet'
+      if (disableSheetEffect !== undefined) {
+        disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
+      }
+      if (height) {
+        translateY.value = animateOpen(height)
+        minimumHeight.value = height
+        return
+      }
+      disableSheetStackEffect.value
+      open()
+    }, [])
+
+    const minimize = useCallback((height?: number) => {
+      'worklet'
+      if (disableSheetStackEffect.value) {
+        disableSheetStackEffect.value = 0
+      }
+      if (height) {
+        translateY.value = animateClose(height)
+        minimumHeight.value = height
+        return
+      }
+      dismiss()
+    }, [])
+
+    const setDisableSheetStackEffect = useCallback((value: 1 | 0) => {
+      disableSheetStackEffect.value = value
+    }, [])
+
     useImperativeHandle(ref, () => ({
       open,
       dismiss,
@@ -220,6 +259,8 @@ export const ModalSheet = forwardRef(
       minimizedHeight,
       id: name,
       expand,
+      minimize,
+      setDisableSheetStackEffect,
     }))
 
     useEffect(() => {
@@ -227,7 +268,7 @@ export const ModalSheet = forwardRef(
     }, [name, ref])
 
     useEffect(() => {
-      disableSheetStackEffect.value = !!props.disableSheetStackEffect
+      disableSheetStackEffect.value = props.disableSheetStackEffect ? 1 : 0
       if (backdropColor && backdropColor !== 'black') {
         bckdropColor.value = backdropColor
       }
