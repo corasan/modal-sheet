@@ -38,6 +38,7 @@ const childrenObj = {
   modalHeight: { value: 0 },
   id: 'children',
   index: 0,
+  showBackdrop: 0,
 }
 
 export function ModalSheetProvider({ children }: PropsWithChildren) {
@@ -78,20 +79,6 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     return {
       borderRadius,
       transform: [{ scaleX }, { translateY }],
-    }
-  })
-  const backdropStyles = useAnimatedStyle(() => {
-    return {
-      opacity: interpolateClamp(
-        modalHeight.value,
-        [minimumHeight.value, MODAL_SHEET_HEIGHT],
-        [0, 0.4],
-      ),
-      zIndex: interpolateClamp(
-        modalHeight.value,
-        [minimumHeight.value, MODAL_SHEET_HEIGHT],
-        [0, 99],
-      ),
     }
   })
 
@@ -173,7 +160,6 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
       <View style={styles.container}>
         <PortalProvider rootHostName="modalSheet">
           <Animated.View style={[styles.animatedContainer, childrenAanimatedStyles]}>
-            <Animated.View style={[styles.backdrop, backdropStyles]} />
             <View style={{ flex: 1, backgroundColor: 'white', overflow: 'hidden' }}>
               {children}
             </View>
@@ -196,7 +182,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 99,
+    // zIndex: 1,
     backgroundColor: 'black',
   },
   animatedContainer: {

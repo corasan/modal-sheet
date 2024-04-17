@@ -86,6 +86,7 @@ export const ModalSheet = forwardRef(
     const dismissHeight = useDerivedValue(() => (!minimizedHeight ? 0 : minimizedHeight))
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
+    const showBackdrop = useSharedValue(0)
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
@@ -135,12 +136,14 @@ export const ModalSheet = forwardRef(
         }
         if (e.translationY < 0) {
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
+          showBackdrop.value = animateOpen(1)
           if (activeIndex.value === 0) {
             updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
           }
           runOnJS(addModalToStack)(name)
         } else {
           modalHeight.value = animateClose(dismissHeight.value)
+          showBackdrop.value = animateClose(0)
           updateModalHeight(animateClose(dismissHeight.value))
           runOnJS(removeModalFromStack)(name)
         }
@@ -148,6 +151,7 @@ export const ModalSheet = forwardRef(
 
     const modalStyle = useAnimatedStyle(() => {
       return {
+        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
         borderRadius: borderRadius.value,
         height: modalHeight.value,
         transform: [
@@ -171,17 +175,15 @@ export const ModalSheet = forwardRef(
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
-      if (modalHeight.value <= minimumHeight.value) {
-        return { zIndex: -99, opacity: 0 }
-      }
       return {
-        opacity: interpolateClamp(scaleX.value, [1, 0.95], [0.3, 0.4]),
-        zIndex: interpolateClamp(scaleX.value, [1, 0.95], [-1, 99]),
+        opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, 0.3]),
+        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [-1, 0]),
       }
     })
 
     const open = () => {
       modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
+      showBackdrop.value = animateOpen(1)
       if (activeIndex.value === 0) {
         updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
       }
@@ -192,11 +194,13 @@ export const ModalSheet = forwardRef(
         behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
         behindModalRef.scaleX.value = animateClose(0.96)
         behindModalRef.borderRadius.value = animateClose(24)
+        behindModalRef.showBackdrop.value = animateClose(0)
       }
     }
 
     const dismiss = () => {
       modalHeight.value = animateClose(dismissHeight.value)
+      showBackdrop.value = animateClose(0)
       if (activeIndex.value === 1) {
         updateModalHeight(animateClose(dismissHeight.value))
       }
@@ -206,12 +210,14 @@ export const ModalSheet = forwardRef(
         behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
         behindModalRef.scaleX.value = animateClose(1)
         behindModalRef.borderRadius.value = animateClose(40)
+        behindModalRef.showBackdrop.value = animateClose(1)
       }
       removeModalFromStack(name)
     }
 
     const expand = useCallback((height?: number, disableSheetEffect?: boolean) => {
       'worklet'
+      showBackdrop.value = animateOpen(activeIndex.value + 1)
       if (disableSheetEffect !== undefined) {
         disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
       }
@@ -225,6 +231,7 @@ export const ModalSheet = forwardRef(
 
     const minimize = useCallback((height?: number) => {
       'worklet'
+      showBackdrop.value = animateClose(0)
       if (disableSheetStackEffect.value) {
         disableSheetStackEffect.value = 0
       }
@@ -250,6 +257,7 @@ export const ModalSheet = forwardRef(
       minimize,
       setDisableSheetStackEffect,
       modalHeight,
+      showBackdrop,
     }))
 
     useEffect(() => {
@@ -273,7 +281,7 @@ export const ModalSheet = forwardRef(
     return (
       <Portal hostName="modalSheet">
         <Animated.View style={[styles.backdrop, backdropStyles]} />
-        <Animated.View style={[shadowStyle, { zIndex: 9999, backgroundColor: 'red' }]}>
+        <Animated.View style={[shadowStyle]}>
           <Animated.View
             style={[
               styles.container,
@@ -325,7 +333,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    // zIndex: 0,
     backgroundColor: 'black',
   },
 })
