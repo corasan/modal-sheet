@@ -2,8 +2,6 @@ import { createContext } from 'react'
 import { SharedValue } from 'react-native-reanimated'
 
 export const ModalSheetContext = createContext<{
-  // setMinimumHeight: (height: number) => void;
-  // translateY: SharedValue<number>;
   dismiss: (name?: string) => void
   open: (name: string) => void
   expand: (
@@ -22,6 +20,7 @@ export const ModalSheetContext = createContext<{
   removeModalFromStack: (modalId: string) => void
   activeIndex: SharedValue<number>
   modalStack: any[]
+  updateModalHeight: (value: number) => void
 }>({
   registerModal: () => {},
   updateY: () => {},
@@ -37,10 +36,5 @@ export const ModalSheetContext = createContext<{
   expand: () => {},
   open: () => {},
   dismiss: () => {},
-  // y: { value: 0 },
-  // setMinimumHeight: () => {},
-  // @ts-ignore
-  // translateY: 0,
-  // modalRef: null,
-  // minimize: () => {},
+  updateModalHeight: () => {},
 })

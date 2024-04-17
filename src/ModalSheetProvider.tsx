@@ -1,6 +1,6 @@
 import { PortalProvider } from '@gorhom/portal'
 import { PropsWithChildren, useCallback, useRef, useState } from 'react'
-import { Dimensions, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
   SharedValue,
@@ -9,11 +9,9 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ModalSheetContext } from './Context'
-
-const HEIGHT = Dimensions.get('window').height
+import { useConstants } from './utils'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
@@ -43,14 +41,15 @@ const childrenObj = {
 }
 
 export function ModalSheetProvider({ children }: PropsWithChildren) {
-  const { top } = useSafeAreaInsets()
+  const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
   const modalRefs = useRef<Record<string, any>>({ children: childrenObj })
   const modalRefsObj = modalRefs.current
   const [modalStack, setModalStack] = useState<ModalRef[]>([childrenObj])
-  const minimumHeight = useSharedValue(HEIGHT)
-  const y = useSharedValue(HEIGHT)
+  const minimumHeight = useSharedValue(0)
+  const y = useSharedValue(MAX_HEIGHT)
+  const modalHeight = useSharedValue(0)
   const dismissValue = useDerivedValue(
-    () => HEIGHT - (minimumHeight.value === HEIGHT ? 0 : minimumHeight.value),
+    () => MAX_HEIGHT - (minimumHeight.value === MAX_HEIGHT ? 0 : minimumHeight.value),
   )
   const isAtMinimumHeight = useDerivedValue(() => y.value === dismissValue.value)
   const disableSheetStackEffect = useSharedValue<1 | 0>(0)
@@ -61,19 +60,38 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
     if (disableSheetStackEffect.value === 1) {
       return {}
     }
-    const borderRadius = interpolateClamp(y.value, [HEIGHT, 0], [0, 24])
-    const scaleX = interpolateClamp(y.value, [dismissValue.value, 0], [1, 0.95])
-    const translateY = interpolateClamp(y.value, [dismissValue.value, 0], [0, top - 20])
-    const scaleY = interpolateClamp(y.value, [dismissValue.value, 0], [1, 0.95])
+    const borderRadius = interpolateClamp(
+      modalHeight.value,
+      [minimumHeight.value, MODAL_SHEET_HEIGHT],
+      [0, 24],
+    )
+    const scaleX = interpolateClamp(
+      modalHeight.value,
+      [minimumHeight.value, MODAL_SHEET_HEIGHT],
+      [1, 0.95],
+    )
+    const translateY = interpolateClamp(
+      modalHeight.value,
+      [minimumHeight.value, MODAL_SHEET_HEIGHT],
+      [0, HEADER_HEIGHT - 5],
+    )
     return {
       borderRadius,
-      transform: [{ scaleX }, { scaleY }, { translateY }],
+      transform: [{ scaleX }, { translateY }],
     }
   })
   const backdropStyles = useAnimatedStyle(() => {
     return {
-      opacity: interpolateClamp(y.value, [dismissValue.value, 0], [0, 0.4]),
-      zIndex: interpolateClamp(y.value, [dismissValue.value, 0], [0, 99]),
+      opacity: interpolateClamp(
+        modalHeight.value,
+        [minimumHeight.value, MODAL_SHEET_HEIGHT],
+        [0, 0.4],
+      ),
+      zIndex: interpolateClamp(
+        modalHeight.value,
+        [minimumHeight.value, MODAL_SHEET_HEIGHT],
+        [0, 99],
+      ),
     }
   })
 
@@ -89,6 +107,11 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
   const updateY = (value: number) => {
     'worklet'
     y.value = value
+  }
+
+  const updateModalHeight = (value: number) => {
+    'worklet'
+    modalHeight.value = value
   }
 
   const addModalToStack = (modalId: string) => {
@@ -144,6 +167,7 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
         expand,
         open,
         dismiss,
+        updateModalHeight,
       }}
     >
       <View style={styles.container}>

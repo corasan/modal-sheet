@@ -6,9 +6,8 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
-  useMemo,
 } from 'react'
-import { Dimensions, View, StyleSheet, StyleProp, ViewStyle } from 'react-native'
+import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native'
 import {
   GestureDetector,
   Gesture,
@@ -18,19 +17,14 @@ import {
   GestureTouchEvent,
 } from 'react-native-gesture-handler'
 import Animated, {
-  Extrapolation,
-  interpolate,
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ModalSheetContext } from './Context'
-import { animateClose, animateOpen, interpolateClamp } from './utils'
-
-const HEIGHT = Dimensions.get('window').height
+import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
 
 type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
@@ -80,24 +74,18 @@ export const ModalSheet = forwardRef(
       removeModalFromStack,
       activeIndex,
       modalStack,
-      updateY,
       disableSheetStackEffect,
       minimumHeight,
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
-      isAtMinimumHeight: sharedIsMinimumHeight,
+      updateModalHeight,
     } = useContext(ModalSheetContext)
-    const translateY = useSharedValue(HEIGHT)
-    const dismissValue = useDerivedValue(
-      () => HEIGHT - (!minimizedHeight ? 0 : minimizedHeight),
-    )
-    const isAtMinimumHeight = useDerivedValue(
-      () => translateY.value === dismissValue.value,
-    )
-    sharedIsMinimumHeight.value = isAtMinimumHeight.value
+    const { MAX_HEIGHT, MODAL_SHEET_HEIGHT, HEADER_HEIGHT, SCREEN_HEIGHT } =
+      useConstants()
+    const modalHeight = useSharedValue(0)
+    const dismissHeight = useDerivedValue(() => (!minimizedHeight ? 0 : minimizedHeight))
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
-    const { top } = useSafeAreaInsets()
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
@@ -115,54 +103,54 @@ export const ModalSheet = forwardRef(
           props.onGestureUpdate(e)
           return
         }
-        if (e.absoluteY < top) {
+        if (activeIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
+          return
+        } else if (activeIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
           return
         }
-        translateY.value = e.absoluteY
+        modalHeight.value = SCREEN_HEIGHT - e.absoluteY
         if (!disableSheetStackEffect.value) {
-          updateY(e.absoluteY)
+          updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
         }
-        const behindModalRef = modalStack[activeIndex.value - 1]
-        if (behindModalRef) {
-          const val = interpolateClamp(
-            e.absoluteY,
-            [HEIGHT, top + 20],
-            [top + 20, top - 5],
-          )
-          behindModalRef.translateY.value = val
-          behindModalRef.scaleX.value = interpolate(
-            e.absoluteY,
-            [dismissValue.value, top + 20],
-            [1, 0.96],
-            Extrapolation.CLAMP,
-          )
-        }
+        // const behindModalRef = modalStack[activeIndex.value - 1]
+        // if (behindModalRef) {
+        //   const val = interpolateClamp(
+        //     e.absoluteY,
+        //     [HEIGHT, top + 20],
+        //     [top + 20, top - 5],
+        //   )
+        //   behindModalRef.translateY.value = val
+        //   behindModalRef.scaleX.value = interpolate(
+        //     e.absoluteY,
+        //     [dismissHeight.value, top + 20],
+        //     [1, 0.96],
+        //     Extrapolation.CLAMP,
+        //   )
+        // }
       })
       .onEnd((e) => {
         if (props.onGestureEnd) {
           runOnJS(props.onGestureEnd)(e)
           return
         }
-        if (e.translationY < 0) {
-          translateY.value = animateOpen(top + 10)
-          if (activeIndex.value === 0) {
-            updateY(animateOpen(top + 10))
-          }
-          runOnJS(addModalToStack)(name)
-        } else {
-          translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
-          updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
-          runOnJS(removeModalFromStack)(name)
-        }
+        // if (e.translationY < 0) {
+        //   // translateY.value = animateOpen(top + 10)
+        //   if (activeIndex.value === 0) {
+        //     updateY(animateOpen(top + 10))
+        //   }
+        //   runOnJS(addModalToStack)(name)
+        // } else {
+        //   // translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
+        //   updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
+        //   runOnJS(removeModalFromStack)(name)
+        // }
       })
 
     const modalStyle = useAnimatedStyle(() => {
       return {
         borderRadius: borderRadius.value,
+        height: modalHeight.value,
         transform: [
-          {
-            translateY: translateY.value,
-          },
           {
             scaleX: scaleX.value,
           },
@@ -174,7 +162,7 @@ export const ModalSheet = forwardRef(
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -6 },
         shadowOpacity: interpolateClamp(
-          translateY.value,
+          modalHeight.value,
           [0, minimumHeight.value],
           [0, 0.08],
         ),
@@ -190,29 +178,29 @@ export const ModalSheet = forwardRef(
     })
 
     const open = () => {
-      translateY.value = animateOpen(top + 10)
+      modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
       if (activeIndex.value === 0) {
-        updateY(animateOpen(top + 10))
+        updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
       }
       addModalToStack(name)
       // // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value]
       if (behindModalRef) {
-        behindModalRef.translateY.value = animateClose(top - 5)
+        behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
         behindModalRef.scaleX.value = animateClose(0.96)
         behindModalRef.borderRadius.value = animateClose(24)
       }
     }
 
     const dismiss = () => {
-      translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
+      modalHeight.value = animateClose(dismissHeight.value ?? 0)
       if (activeIndex.value === 1) {
-        updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
+        updateModalHeight(animateClose(dismissHeight.value ?? 0))
       }
       // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value - 1]
       if (behindModalRef) {
-        behindModalRef.translateY.value = animateClose(top + 20)
+        behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
         behindModalRef.scaleX.value = animateClose(1)
         behindModalRef.borderRadius.value = animateClose(40)
       }
@@ -225,8 +213,7 @@ export const ModalSheet = forwardRef(
         disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
       }
       if (height) {
-        translateY.value = animateOpen(height)
-        minimumHeight.value = height
+        modalHeight.value = animateOpen(height)
         return
       }
       disableSheetStackEffect.value
@@ -239,8 +226,7 @@ export const ModalSheet = forwardRef(
         disableSheetStackEffect.value = 0
       }
       if (height) {
-        translateY.value = animateClose(height)
-        minimumHeight.value = height
+        modalHeight.value = animateClose(height)
         return
       }
       dismiss()
@@ -253,7 +239,6 @@ export const ModalSheet = forwardRef(
     useImperativeHandle(ref, () => ({
       open,
       dismiss,
-      translateY,
       scaleX,
       borderRadius,
       minimizedHeight,
@@ -261,6 +246,7 @@ export const ModalSheet = forwardRef(
       expand,
       minimize,
       setDisableSheetStackEffect,
+      modalHeight,
     }))
 
     useEffect(() => {
@@ -277,7 +263,7 @@ export const ModalSheet = forwardRef(
       }
       if (minimizedHeight) {
         minimumHeight.value = minimizedHeight
-        translateY.value = animateClose(HEIGHT - minimizedHeight)
+        modalHeight.value = animateOpen(minimizedHeight)
       }
     }, [backdropOpacity, backdropOpacity, minimizedHeight, props.disableSheetStackEffect])
 
@@ -308,7 +294,6 @@ export const ModalSheet = forwardRef(
 
 const styles = StyleSheet.create({
   permanentContainer: {
-    height: HEIGHT,
     width: '100%',
     position: 'absolute',
     bottom: 0,
