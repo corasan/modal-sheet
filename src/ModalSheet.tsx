@@ -108,42 +108,42 @@ export const ModalSheet = forwardRef(
         } else if (activeIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
           return
         }
-        modalHeight.value = SCREEN_HEIGHT - e.absoluteY
-        if (!disableSheetStackEffect.value) {
+        const moveVal = SCREEN_HEIGHT - e.absoluteY
+        modalHeight.value = moveVal
+        if (!disableSheetStackEffect.value && activeIndex.value === 1) {
           updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
         }
-        // const behindModalRef = modalStack[activeIndex.value - 1]
-        // if (behindModalRef) {
-        //   const val = interpolateClamp(
-        //     e.absoluteY,
-        //     [HEIGHT, top + 20],
-        //     [top + 20, top - 5],
-        //   )
-        //   behindModalRef.translateY.value = val
-        //   behindModalRef.scaleX.value = interpolate(
-        //     e.absoluteY,
-        //     [dismissHeight.value, top + 20],
-        //     [1, 0.96],
-        //     Extrapolation.CLAMP,
-        //   )
-        // }
+        const behindModalRef = modalStack[activeIndex.value - 1]
+        if (behindModalRef) {
+          const val = interpolateClamp(
+            moveVal,
+            [0, MODAL_SHEET_HEIGHT],
+            [MODAL_SHEET_HEIGHT, MAX_HEIGHT + 5],
+          )
+          behindModalRef.modalHeight.value = val
+          behindModalRef.scaleX.value = interpolateClamp(
+            moveVal,
+            [dismissHeight.value, MODAL_SHEET_HEIGHT],
+            [1, 0.96],
+          )
+        }
       })
       .onEnd((e) => {
         if (props.onGestureEnd) {
           runOnJS(props.onGestureEnd)(e)
           return
         }
-        // if (e.translationY < 0) {
-        //   // translateY.value = animateOpen(top + 10)
-        //   if (activeIndex.value === 0) {
-        //     updateY(animateOpen(top + 10))
-        //   }
-        //   runOnJS(addModalToStack)(name)
-        // } else {
-        //   // translateY.value = animateClose(HEIGHT - (minimizedHeight ?? 0))
-        //   updateY(animateClose(HEIGHT - (minimizedHeight ?? 0)))
-        //   runOnJS(removeModalFromStack)(name)
-        // }
+        if (e.translationY < 0) {
+          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
+          if (activeIndex.value === 0) {
+            updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
+          }
+          runOnJS(addModalToStack)(name)
+        } else {
+          modalHeight.value = animateClose(dismissHeight.value)
+          updateModalHeight(animateClose(dismissHeight.value))
+          runOnJS(removeModalFromStack)(name)
+        }
       })
 
     const modalStyle = useAnimatedStyle(() => {
@@ -171,9 +171,12 @@ export const ModalSheet = forwardRef(
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
+      if (modalHeight.value <= minimumHeight.value) {
+        return { zIndex: -99, opacity: 0 }
+      }
       return {
-        opacity: interpolateClamp(scaleX.value, [1, 0.95], [0, 0.4]),
-        zIndex: interpolateClamp(scaleX.value, [1, 0.95], [0, 99]),
+        opacity: interpolateClamp(scaleX.value, [1, 0.95], [0.3, 0.4]),
+        zIndex: interpolateClamp(scaleX.value, [1, 0.95], [-1, 99]),
       }
     })
 
@@ -193,9 +196,9 @@ export const ModalSheet = forwardRef(
     }
 
     const dismiss = () => {
-      modalHeight.value = animateClose(dismissHeight.value ?? 0)
+      modalHeight.value = animateClose(dismissHeight.value)
       if (activeIndex.value === 1) {
-        updateModalHeight(animateClose(dismissHeight.value ?? 0))
+        updateModalHeight(animateClose(dismissHeight.value))
       }
       // Animate the modal behind
       const behindModalRef = modalStack[activeIndex.value - 1]
@@ -269,7 +272,8 @@ export const ModalSheet = forwardRef(
 
     return (
       <Portal hostName="modalSheet">
-        <Animated.View style={shadowStyle}>
+        <Animated.View style={[styles.backdrop, backdropStyles]} />
+        <Animated.View style={[shadowStyle, { zIndex: 9999, backgroundColor: 'red' }]}>
           <Animated.View
             style={[
               styles.container,
@@ -278,7 +282,6 @@ export const ModalSheet = forwardRef(
               modalStyle,
             ]}
           >
-            <Animated.View style={[styles.backdrop, backdropStyles]} />
             <GestureDetector gesture={gesture}>
               <View style={styles.handleContainer}>
                 {!noHandle && <View style={styles.handle} />}
@@ -322,7 +325,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 0,
+    // zIndex: 0,
     backgroundColor: 'black',
   },
 })
