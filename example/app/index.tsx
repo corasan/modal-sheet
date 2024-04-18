@@ -1,13 +1,47 @@
 import { ModalSheet } from '@corasan/modal-sheet'
+import { ModalSheetRef } from '@corasan/modal-sheet/types'
 import { useRef } from 'react'
 import { Button, Dimensions, StyleSheet, Text, View } from 'react-native'
+import {
+  GestureStateChangeEvent,
+  PanGestureHandlerEventPayload,
+} from 'react-native-gesture-handler'
 
 const HEIGHT = Dimensions.get('window').height
+const SWIPE_VELOCITY_THRESHOLD = 1500
 
 export default function App() {
-  const modal1 = useRef()
-  const modal2 = useRef()
-  const modal3 = useRef()
+  const modal1 = useRef<ModalSheetRef>()
+  const modal2 = useRef<ModalSheetRef>()
+  const modal3 = useRef<ModalSheetRef>()
+  const minHeight = useRef(HEIGHT - 200).current
+
+  const onGestureEnd = (
+    event: GestureStateChangeEvent<PanGestureHandlerEventPayload>,
+  ) => {
+    const { velocityY, absoluteY, translationY } = event
+    if (translationY > 0) {
+      if (absoluteY < minHeight && velocityY > SWIPE_VELOCITY_THRESHOLD) {
+        modal1.current?.minimize()
+      } else if (absoluteY < HEIGHT / 2 && translationY > 80) {
+        modal1.current?.minimize(HEIGHT / 2)
+      } else if (absoluteY > HEIGHT / 2) {
+        modal1.current?.minimize()
+      } else {
+        modal1.current?.expand(undefined, false)
+      }
+    } else {
+      if (velocityY < -SWIPE_VELOCITY_THRESHOLD) {
+        modal1.current?.expand(undefined, false)
+      } else if (absoluteY > HEIGHT / 2 && translationY < -80) {
+        modal1.current?.expand(HEIGHT / 2, true)
+      } else if (absoluteY < HEIGHT / 2) {
+        modal1.current?.expand(undefined, false)
+      } else {
+        modal1.current?.minimize()
+      }
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -26,7 +60,7 @@ export default function App() {
       <Button
         title="Modal 1 - expand(HEIGHT / 2)"
         onPress={() => {
-          modal1.current?.expand(HEIGHT / 3)
+          modal1.current?.expand(HEIGHT / 2)
         }}
       />
       <ModalSheet
@@ -35,6 +69,7 @@ export default function App() {
         backdropOpacity={0.5}
         ref={modal1}
         minimizedHeight={250}
+        onGestureEnd={onGestureEnd}
       >
         <View style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>

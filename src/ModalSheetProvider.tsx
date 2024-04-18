@@ -12,20 +12,11 @@ import Animated, {
 
 import { ModalSheetContext } from './Context'
 import { useConstants } from './utils'
+import { ModalSheetRef } from './types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
   return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
-}
-
-type ModalRef = {
-  open: () => void
-  dismiss: () => void
-  translateY: SharedValue<number>
-  id: string
-  index: number
-  modalHeight: SharedValue<number>
-  [key: string]: any
 }
 
 const childrenObj = {
@@ -43,9 +34,9 @@ const childrenObj = {
 
 export function ModalSheetProvider({ children }: PropsWithChildren) {
   const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
-  const modalRefs = useRef<Record<string, any>>({ children: childrenObj })
+  const modalRefs = useRef<Record<string, ModalSheetRef>>({ children: childrenObj })
   const modalRefsObj = modalRefs.current
-  const [modalStack, setModalStack] = useState<ModalRef[]>([childrenObj])
+  const [modalStack, setModalStack] = useState<ModalSheetRef[]>([childrenObj])
   const minimumHeight = useSharedValue(0)
   const y = useSharedValue(MAX_HEIGHT)
   const modalHeight = useSharedValue(0)
@@ -160,9 +151,7 @@ export function ModalSheetProvider({ children }: PropsWithChildren) {
       <View style={styles.container}>
         <PortalProvider rootHostName="modalSheet">
           <Animated.View style={[styles.animatedContainer, childrenAanimatedStyles]}>
-            <View style={{ flex: 1, backgroundColor: 'white', overflow: 'hidden' }}>
-              {children}
-            </View>
+            {children}
           </Animated.View>
         </PortalProvider>
       </View>
@@ -182,7 +171,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    // zIndex: 1,
     backgroundColor: 'black',
   },
   animatedContainer: {

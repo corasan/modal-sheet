@@ -182,6 +182,7 @@ export const ModalSheet = forwardRef(
     })
 
     const open = () => {
+      disableSheetStackEffect.value = 0
       modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
       showBackdrop.value = animateOpen(1)
       if (activeIndex.value === 0) {
@@ -225,7 +226,7 @@ export const ModalSheet = forwardRef(
         modalHeight.value = animateOpen(height)
         return
       }
-      disableSheetStackEffect.value
+      disableSheetStackEffect.value = 0
       open()
     }, [])
 
