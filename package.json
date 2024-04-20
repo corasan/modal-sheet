@@ -1,9 +1,9 @@
 {
   "name": "@corasan/modal-sheet",
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0-rc.4",
   "description": "Modal sheet component for React Native. Inspired by the native modal sheet in iOS.",
   "main": "src/index.ts",
-  "types": "src/types.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "open:ios": "open -a \"Xcode\" example/ios",
     "open:android": "open -a \"Android Studio\" example/android"
