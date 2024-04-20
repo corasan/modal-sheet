@@ -11,7 +11,7 @@ import Animated, {
 
 import { ModalSheetInternalContext } from './InternalContext'
 import { useConstants } from '../utils'
-import { ModalSheetRef } from '../types'
+import { ModalSheetRef } from '..'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
