@@ -1,6 +1,5 @@
 import { ModalSheet } from '@corasan/modal-sheet'
 import { ModalSheetRef } from '@corasan/modal-sheet/types'
-import { useRouter } from 'expo-router'
 import { useRef } from 'react'
 import { Button, Dimensions, StyleSheet, Text, View } from 'react-native'
 import {
@@ -11,11 +10,10 @@ import {
 const HEIGHT = Dimensions.get('window').height
 const SWIPE_VELOCITY_THRESHOLD = 1500
 
-export default function App() {
-  const router = useRouter()
+export default function Page1() {
   const modal1 = useRef<ModalSheetRef>()
   const modal2 = useRef<ModalSheetRef>()
-  const modal3 = useRef<ModalSheetRef>()
+
   const minHeight = useRef(HEIGHT - 200).current
 
   const onGestureEnd = (
@@ -48,12 +46,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Button
-        title="Go to Page 1"
-        onPress={() => {
-          router.push('page1')
-        }}
-      />
-      <Button
         title="Modal 1 - open()"
         onPress={() => {
           modal1.current?.open()
@@ -72,11 +64,10 @@ export default function App() {
         }}
       />
       <ModalSheet
-        name="modal1"
+        name="page1-modal1"
         backdropColor="white"
         backdropOpacity={0.5}
         ref={modal1}
-        minimizedHeight={250}
         onGestureEnd={onGestureEnd}
       >
         <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -98,17 +89,16 @@ export default function App() {
         </View>
       </ModalSheet>
 
-      <ModalSheet name="modal2" backdropColor="white" backdropOpacity={0.5} ref={modal2}>
+      <ModalSheet
+        name="page1-modal2"
+        backdropColor="white"
+        backdropOpacity={0.5}
+        ref={modal2}
+      >
         <View style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 2</Text>
           </View>
-          <Button
-            title="Open Modal 3"
-            onPress={() => {
-              modal3.current?.open()
-            }}
-          />
           <Button
             title="Dismiss Modal"
             onPress={() => {
@@ -117,23 +107,9 @@ export default function App() {
           />
         </View>
       </ModalSheet>
-      <ModalSheet name="modal3" backdropColor="white" backdropOpacity={0.5} ref={modal3}>
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
-          </View>
-          <Button
-            title="Dismiss Modal"
-            onPress={() => {
-              modal3.current?.dismiss()
-            }}
-          />
-        </View>
-      </ModalSheet>
     </View>
   )
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
+  useState,
 } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
@@ -15,7 +16,6 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
-
 import { ModalSheetContext } from './Providers/Context'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
 import { ModalSheetProps } from './types'
@@ -61,6 +61,7 @@ export const ModalSheet = forwardRef(
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
+    const [shouldTeleport, setShouldTeleport] = useState(true)
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
@@ -148,6 +149,10 @@ export const ModalSheet = forwardRef(
         ),
         shadowRadius: 8,
         backdropColor: 'white',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -158,6 +163,7 @@ export const ModalSheet = forwardRef(
     })
 
     const open = () => {
+      setShouldTeleport(true)
       disableSheetStackEffect.value = 0
       modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
       showBackdrop.value = animateOpen(1)
@@ -193,6 +199,9 @@ export const ModalSheet = forwardRef(
         behindModalRef.borderRadius.value = animateClose(40)
         behindModalRef.showBackdrop.value = animateClose(1)
       }
+      if (minimizedHeight !== undefined) {
+        setTimeout(() => setShouldTeleport(false), 1000)
+      }
       removeModalFromStack(name)
     }
 
@@ -200,6 +209,7 @@ export const ModalSheet = forwardRef(
     // If the height is not provided, the modal will expand to its maximum height
     const expand = useCallback((height?: number, disableSheetEffect?: boolean) => {
       'worklet'
+      setShouldTeleport(true)
       showBackdrop.value = animateOpen(activeIndex.value + 1)
       if (disableSheetEffect !== undefined) {
         disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
@@ -216,6 +226,7 @@ export const ModalSheet = forwardRef(
     // If the height is not provided, the modal will minimize to its minimized height
     const minimize = useCallback((height?: number) => {
       'worklet'
+      setShouldTeleport(false)
       showBackdrop.value = animateClose(0)
       if (disableSheetStackEffect.value) {
         disableSheetStackEffect.value = 0
@@ -224,6 +235,7 @@ export const ModalSheet = forwardRef(
         modalHeight.value = animateClose(height)
         return
       }
+      setShouldTeleport(true)
       dismiss()
     }, [])
 
@@ -259,32 +271,57 @@ export const ModalSheet = forwardRef(
         bckdropOpacity.value = backdropOpacity
       }
       if (minimizedHeight) {
+        setShouldTeleport(false)
         minimumHeight.value = minimizedHeight
         modalHeight.value = animateOpen(minimizedHeight)
       }
     }, [backdropOpacity, backdropOpacity, minimizedHeight, props.disableSheetStackEffect])
 
     return (
-      <Portal hostName="modalSheet">
-        <Animated.View style={[styles.backdrop, backdropStyles]} />
-        <Animated.View style={[shadowStyle]}>
-          <Animated.View
-            style={[
-              styles.container,
-              props.containerStyle,
-              styles.permanentContainer,
-              modalStyle,
-            ]}
-          >
-            <GestureDetector gesture={gesture}>
-              <View style={styles.handleContainer}>
-                {!noHandle && <View style={styles.handle} />}
-              </View>
-            </GestureDetector>
-            <View style={{ flex: 1 }}>{children}</View>
-          </Animated.View>
-        </Animated.View>
-      </Portal>
+      <>
+        {!shouldTeleport ? (
+          <>
+            <Animated.View style={[shadowStyle]}>
+              <Animated.View
+                style={[
+                  styles.container,
+                  props.containerStyle,
+                  styles.permanentContainer,
+                  modalStyle,
+                ]}
+              >
+                <GestureDetector gesture={gesture}>
+                  <View style={styles.handleContainer}>
+                    {!noHandle && <View style={styles.handle} />}
+                  </View>
+                </GestureDetector>
+                <View style={{ flex: 1 }}>{children}</View>
+              </Animated.View>
+            </Animated.View>
+          </>
+        ) : (
+          <Portal hostName="modalSheet">
+            <Animated.View style={[styles.backdrop, backdropStyles]} />
+            <Animated.View style={[shadowStyle]}>
+              <Animated.View
+                style={[
+                  styles.container,
+                  props.containerStyle,
+                  styles.permanentContainer,
+                  modalStyle,
+                ]}
+              >
+                <GestureDetector gesture={gesture}>
+                  <View style={styles.handleContainer}>
+                    {!noHandle && <View style={styles.handle} />}
+                  </View>
+                </GestureDetector>
+                <View style={{ flex: 1 }}>{children}</View>
+              </Animated.View>
+            </Animated.View>
+          </Portal>
+        )}
+      </>
     )
   },
 )
