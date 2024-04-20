@@ -16,18 +16,9 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
-import { ModalSheetContext } from './Providers/Context'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
 import { ModalSheetProps } from './types'
 import { useInternal } from './hooks/useInternal'
-
-export const useInternalModalSheet = () => {
-  const context = useContext(ModalSheetContext)
-  if (context === undefined) {
-    throw new Error('useInternalModalSheet must be used within a ModalSheetProvider')
-  }
-  return context
-}
 
 export const ModalSheet = forwardRef(
   (
