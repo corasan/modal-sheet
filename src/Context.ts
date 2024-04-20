@@ -1,27 +1,8 @@
 import { createContext } from 'react'
 import { SharedValue } from 'react-native-reanimated'
+import { ModalSheetContextType } from './types'
 
-export const ModalSheetContext = createContext<{
-  dismiss: (name?: string) => void
-  open: (name: string) => void
-  expand: (
-    name: string,
-    options?: Partial<{ height?: number; disableSheetEffect: boolean }>,
-  ) => void
-  // minimize: (height?: number, disableSheetStack?: boolean) => void;
-  minimumHeight: SharedValue<number>
-  backdropColor: SharedValue<string>
-  backdropOpacity: SharedValue<number>
-  isAtMinimumHeight: SharedValue<boolean>
-  disableSheetStackEffect: SharedValue<1 | 0>
-  registerModal: (id: string, ref: any) => void
-  updateY: (value: number) => void
-  addModalToStack: (modalId: string) => void
-  removeModalFromStack: (modalId: string) => void
-  activeIndex: SharedValue<number>
-  modalStack: any[]
-  updateModalHeight: (value: number) => void
-}>({
+export const ModalSheetContext = createContext<ModalSheetContextType>({
   registerModal: () => {},
   updateY: () => {},
   addModalToStack: () => {},

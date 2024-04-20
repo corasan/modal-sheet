@@ -19,21 +19,24 @@ function interpolateClamp(value: number, inputRange: number[], outputRange: numb
 }
 
 const childrenObj = {
+  index: 0,
+  id: 'app',
   children: null,
   open: () => {},
   dismiss: () => {},
-  translateY: { value: 0 },
+  expand: () => {},
+  minimize: () => {},
   scaleX: { value: 1 },
-  borderRadius: { value: 0 },
+  translateY: { value: 0 },
   modalHeight: { value: 0 },
-  id: 'children',
-  index: 0,
-  showBackdrop: 0,
+  borderRadius: { value: 0 },
+  showBackdrop: { value: 0 },
+  setDisableSheetStackEffect: () => {},
 }
 
 export function ModalSheetProvider({ children }: PropsWithChildren) {
   const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
-  const modalRefs = useRef<Record<string, ModalSheetRef>>({ children: childrenObj })
+  const modalRefs = useRef<Record<string, ModalSheetRef>>({ app: childrenObj })
   const modalRefsObj = modalRefs.current
   const [modalStack, setModalStack] = useState<ModalSheetRef[]>([childrenObj])
   const minimumHeight = useSharedValue(0)

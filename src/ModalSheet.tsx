@@ -7,15 +7,8 @@ import {
   useEffect,
   useImperativeHandle,
 } from 'react'
-import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native'
-import {
-  GestureDetector,
-  Gesture,
-  GestureStateChangeEvent,
-  PanGestureHandlerEventPayload,
-  GestureUpdateEvent,
-  GestureTouchEvent,
-} from 'react-native-gesture-handler'
+import { View, StyleSheet } from 'react-native'
+import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -25,27 +18,7 @@ import Animated, {
 
 import { ModalSheetContext } from './Context'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
-
-type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
-
-export interface ModalSheetProps {
-  name: string
-  containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>
-  noHandle?: boolean
-  backdropColor?: string
-  backdropOpacity?: number
-  minimizedHeight?: number
-  disableSheetStackEffect?: boolean
-  onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
-  onGestureBegin?: (e: GestureEvent) => void
-  onGestureStarts?: (e: GestureEvent) => void
-  onGestureEnd?: (e: GestureEvent) => void
-  onGestureFinalize?: (e: GestureEvent) => void
-  onGestureTouchesDown?: (e: GestureTouchEvent) => void
-  onGestureTouchesUp?: (e: GestureTouchEvent) => void
-  onGestureTouchesMove?: (e: GestureTouchEvent) => void
-  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
-}
+import { ModalSheetProps } from './types'
 
 export const useInternalModalSheet = () => {
   const context = useContext(ModalSheetContext)
