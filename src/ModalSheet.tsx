@@ -114,6 +114,8 @@ export const ModalSheet = forwardRef(
         if (!disableSheetStackEffect.value && activeIndex.value === 1) {
           updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
         }
+        // Animate the modal behind if there is a stack of modals
+        // When the current modal is dragged, the modal behind animates with it
         const behindModalRef = modalStack[activeIndex.value - 1]
         if (behindModalRef) {
           const val = interpolateClamp(
@@ -186,10 +188,13 @@ export const ModalSheet = forwardRef(
       modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
       showBackdrop.value = animateOpen(1)
       if (activeIndex.value === 0) {
+        // If there is no modal in the stack, update the modal height
+        // This value is used to animate the app container when the modal is opened
         updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
       }
       addModalToStack(name)
-      // // Animate the modal behind
+      // Animate the modal behind if there is a stack of modals
+      // When a new modal is opened, the previous modal should be moved to the back
       const behindModalRef = modalStack[activeIndex.value]
       if (behindModalRef) {
         behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
@@ -205,7 +210,8 @@ export const ModalSheet = forwardRef(
       if (activeIndex.value === 1) {
         updateModalHeight(animateClose(dismissHeight.value))
       }
-      // Animate the modal behind
+      // Animate the modal behind if there is a stack of modals
+      // When the modal is dismissed, the modal behind should be moved to the top
       const behindModalRef = modalStack[activeIndex.value - 1]
       if (behindModalRef) {
         behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
@@ -216,6 +222,8 @@ export const ModalSheet = forwardRef(
       removeModalFromStack(name)
     }
 
+    // This function is used to expand the modal to a specific height
+    // If the height is not provided, the modal will expand to its maximum height
     const expand = useCallback((height?: number, disableSheetEffect?: boolean) => {
       'worklet'
       showBackdrop.value = animateOpen(activeIndex.value + 1)
@@ -230,6 +238,8 @@ export const ModalSheet = forwardRef(
       open()
     }, [])
 
+    // This function is used to minimize the modal to a specific height
+    // If the height is not provided, the modal will minimize to its minimized height
     const minimize = useCallback((height?: number) => {
       'worklet'
       showBackdrop.value = animateClose(0)
@@ -262,6 +272,7 @@ export const ModalSheet = forwardRef(
     }))
 
     useEffect(() => {
+      // Register the modal with the context
       registerModal(name, ref.current)
     }, [name, ref])
 

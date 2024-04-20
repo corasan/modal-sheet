@@ -3,7 +3,6 @@ import { PropsWithChildren, useCallback, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
-  SharedValue,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
