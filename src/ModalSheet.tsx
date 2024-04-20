@@ -19,7 +19,7 @@ import Animated, {
 import { ModalSheetContext } from './Providers/Context'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
 import { ModalSheetProps } from './types'
-import { ModalSheetInternalContext } from './Providers/InternalContext'
+import { useInternal } from './hooks/useInternal'
 
 export const useInternalModalSheet = () => {
   const context = useContext(ModalSheetContext)
@@ -53,7 +53,7 @@ export const ModalSheet = forwardRef(
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
       updateModalHeight,
-    } = useContext(ModalSheetInternalContext)
+    } = useInternal()
     const { MAX_HEIGHT, MODAL_SHEET_HEIGHT, HEADER_HEIGHT, SCREEN_HEIGHT } =
       useConstants()
     const modalHeight = useSharedValue(0)
