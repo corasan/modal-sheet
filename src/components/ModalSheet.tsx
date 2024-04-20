@@ -16,11 +16,11 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
-import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
-import { ModalSheetProps } from './types'
-import { useInternal } from './hooks/useInternal'
+import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
+import { ModalSheetProps, ModalSheetRef } from '..'
+import { useInternal } from '../hooks/useInternal'
 
-export const ModalSheet = forwardRef(
+export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheetProps>>(
   (
     {
       name,
@@ -30,8 +30,8 @@ export const ModalSheet = forwardRef(
       minimizedHeight,
       children,
       ...props
-    }: PropsWithChildren<ModalSheetProps>,
-    ref: any,
+    },
+    ref,
   ) => {
     const {
       registerModal,
@@ -250,7 +250,9 @@ export const ModalSheet = forwardRef(
 
     useEffect(() => {
       // Register the modal with the context
-      registerModal(name, ref.current)
+      if (ref && 'current' in ref) {
+        registerModal(name, ref.current)
+      }
     }, [name, ref])
 
     useEffect(() => {

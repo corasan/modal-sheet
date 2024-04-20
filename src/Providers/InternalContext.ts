@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { ModalSheetInternalContextType } from '../types'
+import { ModalSheetInternalContextType } from '..'
 
 export const ModalSheetInternalContext = createContext<ModalSheetInternalContextType>({
   registerModal: () => {},

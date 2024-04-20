@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { ModalSheetContextType } from '../types'
+import { ModalSheetContextType } from '..'
 
 // WIP
 export const ModalSheetContext = createContext<ModalSheetContextType>({
