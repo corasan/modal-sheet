@@ -16,9 +16,10 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 
-import { ModalSheetContext } from './Context'
+import { ModalSheetContext } from './Providers/Context'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from './utils'
 import { ModalSheetProps } from './types'
+import { ModalSheetInternalContext } from './Providers/InternalContext'
 
 export const useInternalModalSheet = () => {
   const context = useContext(ModalSheetContext)
@@ -52,7 +53,7 @@ export const ModalSheet = forwardRef(
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
       updateModalHeight,
-    } = useContext(ModalSheetContext)
+    } = useContext(ModalSheetInternalContext)
     const { MAX_HEIGHT, MODAL_SHEET_HEIGHT, HEADER_HEIGHT, SCREEN_HEIGHT } =
       useConstants()
     const modalHeight = useSharedValue(0)

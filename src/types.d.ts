@@ -45,7 +45,7 @@ export interface ModalSheetProps {
   onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
 }
 
-export interface ModalSheetContextType {
+export interface ModalSheetContextBaseType {
   registerModal: (modalId: string, ref: MutableRefObject<ModalSheetRef>) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
@@ -57,6 +57,7 @@ export interface ModalSheetContextType {
   backdropColor: Animated.SharedValue<string>
   backdropOpacity: Animated.SharedValue<number>
   disableSheetStackEffect: Animated.SharedValue<1 | 0>
+  modalRefs: MutableRefObject<Record<string, ModalSheetRef>>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },
@@ -65,3 +66,12 @@ export interface ModalSheetContextType {
   dismiss: (name?: string) => void
   updateModalHeight: (value: number) => void
 }
+
+export type ModalSheetInternalContextType = ModalSheetContextBaseType
+
+export type ModalSheetContextType = Pick<
+  ModalSheetContextBaseType,
+  'open',
+  'dismiss',
+  'expand'
+>
