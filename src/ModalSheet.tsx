@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   handleContainer: {
-    height: 30,
+    height: 40,
     width: '100%',
     backgroundColor: 'transparent',
     alignItems: 'center',
