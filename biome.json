@@ -1,0 +1,154 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.7.0/schema.json",
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "space",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 90,
+		"attributePosition": "auto"
+	},
+	"organizeImports": { "enabled": true },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": false,
+			"complexity": {
+				"noExtraBooleanCast": "warn",
+				"noUselessConstructor": "warn",
+				"noUselessLoneBlockStatements": "warn",
+				"noUselessRename": "warn",
+				"noUselessTernary": "warn",
+				"noVoid": "warn",
+				"noWith": "warn"
+			},
+			"correctness": {
+				"noConstAssign": "error",
+				"noConstantCondition": "warn",
+				"noEmptyCharacterClassInRegex": "warn",
+				"noEmptyPattern": "warn",
+				"noGlobalObjectCalls": "warn",
+				"noInnerDeclarations": "warn",
+				"noInvalidConstructorSuper": "warn",
+				"noNewSymbol": "error",
+				"noSelfAssign": "warn",
+				"noSwitchDeclarations": "warn",
+				"noUndeclaredVariables": "error",
+				"noUnreachable": "warn",
+				"noUnreachableSuper": "warn",
+				"noUnusedLabels": "warn",
+				"noUnusedVariables": "warn",
+				"useExhaustiveDependencies": "off",
+				"useHookAtTopLevel": "error",
+				"useIsNan": "error"
+			},
+			"security": { "noGlobalEval": "warn" },
+			"style": {
+				"noArguments": "warn",
+				"noCommaOperator": "warn",
+				"noImplicitBoolean": "warn",
+				"noVar": "warn",
+				"useBlockStatements": "warn",
+				"useConst": "warn",
+				"useFragmentSyntax": "warn"
+			},
+			"suspicious": {
+				"noCatchAssign": "warn",
+				"noCompareNegZero": "warn",
+				"noControlCharactersInRegex": "off",
+				"noDebugger": "warn",
+				"noDoubleEquals": "warn",
+				"noDuplicateCase": "error",
+				"noDuplicateClassMembers": "error",
+				"noDuplicateJsxProps": "error",
+				"noDuplicateObjectKeys": "error",
+				"noDuplicateParameters": "error",
+				"noFallthroughSwitchClause": "warn",
+				"noFunctionAssign": "error",
+				"noGlobalAssign": "warn",
+				"noLabelVar": "warn",
+				"noRedeclare": "warn",
+				"noSelfCompare": "warn",
+				"noShadowRestrictedNames": "warn",
+				"noUnsafeNegation": "warn",
+				"useGetterReturn": "warn",
+				"useValidTypeof": "error"
+			}
+		},
+		"ignore": ["build"]
+	},
+	"javascript": {
+		"formatter": {
+			"jsxQuoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"trailingComma": "all",
+			"semicolons": "asNeeded",
+			"arrowParentheses": "always",
+			"bracketSpacing": true,
+			"bracketSameLine": false,
+			"quoteStyle": "single",
+			"attributePosition": "auto"
+		},
+		"globals": []
+	},
+	"overrides": [
+		{ "include": ["*.web.*"] },
+		{ "include": ["*.d.ts"], "linter": { "rules": {} } },
+		{ "include": ["*.js", "*.jsx"] },
+		{
+			"include": ["*.ts", "*.tsx", "*.d.ts"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"noBannedTypes": "error",
+						"noUselessConstructor": "warn"
+					},
+					"correctness": {
+						"noUndeclaredVariables": "off",
+						"noUnusedVariables": "warn"
+					},
+					"style": {
+						"useConsistentArrayType": {
+							"level": "warn",
+							"options": { "syntax": "shorthand" }
+						}
+					},
+					"suspicious": {
+						"noDuplicateClassMembers": "warn",
+						"noExtraNonNullAssertion": "warn",
+						"noRedeclare": "warn"
+					}
+				}
+			}
+		},
+		{ "include": ["*.d.ts"], "linter": { "rules": {} } },
+		{ "include": ["*.js", "*.jsx"] },
+		{
+			"include": ["*.ts", "*.tsx", "*.d.ts"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"noBannedTypes": "error",
+						"noUselessConstructor": "warn"
+					},
+					"correctness": {
+						"noUndeclaredVariables": "off",
+						"noUnusedVariables": "warn"
+					},
+					"style": {
+						"useConsistentArrayType": {
+							"level": "warn",
+							"options": { "syntax": "shorthand" }
+						}
+					},
+					"suspicious": {
+						"noDuplicateClassMembers": "warn",
+						"noExtraNonNullAssertion": "warn",
+						"noRedeclare": "warn"
+					}
+				}
+			}
+		}
+	]
+}

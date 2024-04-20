@@ -1,5 +1,5 @@
 > [!WARNING]
-> This package is still in development and not ready for production use. Extremely unstable and may have breaking changes.
+> This package is still in development and not fully featured yet. Please use with caution.
 
 ## Installation
 
@@ -73,7 +73,7 @@ function YourComponent() {
 | children | ReactNode | - | The children components | Kinda |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
-| minimumHeight | number | - | The minimum height the modal can be minized | No |
+| minimizedHeight | number | - | The minimum height the modal can be minized | No |
 | disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
 | onGestureUpdate | (e: GestureUpdateEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle gesture updates | No |
 | onGestureBegin | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture begin | No |
@@ -89,10 +89,12 @@ function YourComponent() {
 
 ### useModalSheet
 
+> [!WARNING]
+> This is a work in progress and not yet fully implemented/functional
+
 | Name | Type | Description |
 | --- | --- | --- |
 | open | () => void | Open the modal sheet |
 | dismiss | () => void | Dismiss the modal sheet |
 | expand | (height?: number, disableSheetStack?: boolean) => void | expand to custom height |
 | minimize | (height?: number) => void | Minimize to custom height |
-| translateY | SharedValue<number> | The animated value for the modal sheet translateY |
