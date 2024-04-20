@@ -71,7 +71,5 @@ export type ModalSheetInternalContextType = ModalSheetContextBaseType
 
 export type ModalSheetContextType = Pick<
   ModalSheetContextBaseType,
-  'open',
-  'dismiss',
-  'expand'
+  'open' | 'dismiss' | 'expand'
 >
