@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { ModalSheetInternalContextType } from './ModalSheetContext.types'
+import { ModalSheetInternalContextType } from '../types'
 import { SharedValue } from 'react-native-reanimated'
 
 export const ModalSheetInternalContext = createContext<ModalSheetInternalContextType>({

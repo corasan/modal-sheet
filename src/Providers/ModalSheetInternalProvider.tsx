@@ -12,7 +12,7 @@ import Animated, {
 
 import { ModalSheetInternalContext } from './InternalContext'
 import { useConstants } from '../utils'
-import { ModalSheetRef } from '../components/ModalSheet.types'
+import { ModalSheetRef } from '../types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
