@@ -3,7 +3,6 @@ import {
   PropsWithChildren,
   forwardRef,
   useCallback,
-  useContext,
   useEffect,
   useImperativeHandle,
   useState,
@@ -17,10 +16,13 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
-import { ModalSheetProps, ModalSheetRef } from '..'
+import { ModalSheetProps } from '../types'
 import { useInternal } from '../hooks/useInternal'
 
-export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheetProps>>(
+export const ModalSheet = forwardRef<
+  typeof ModalSheet,
+  PropsWithChildren<ModalSheetProps>
+>(
   (
     {
       name,
@@ -250,7 +252,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
     useEffect(() => {
       // Register the modal with the context
-      if (ref && 'current' in ref) {
+      if (ref && 'current' in ref && ref.current) {
         registerModal(name, ref.current)
       }
     }, [name, ref])
