@@ -21,7 +21,6 @@ export interface ModalSheetRef {
   showBackdrop: SharedValue<number>
   minimizedHeight?: number
   id: string
-  index: number
   children?: React.ReactNode
 }
 
@@ -42,4 +41,5 @@ export interface ModalSheetProps {
   onGestureTouchesUp?: (e: GestureTouchEvent) => void
   onGestureTouchesMove?: (e: GestureTouchEvent) => void
   onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
+  ref: React.RefObject<ModalSheetRef>
 }

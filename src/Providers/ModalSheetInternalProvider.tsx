@@ -3,6 +3,7 @@ import { PropsWithChildren, useCallback, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
+  SharedValue,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
@@ -11,27 +12,26 @@ import Animated, {
 
 import { ModalSheetInternalContext } from './InternalContext'
 import { useConstants } from '../utils'
-import { ModalSheetRef } from '..'
+import { ModalSheetRef } from '../components/ModalSheet.types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
   return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
 }
 
-const appObj = {
-  index: 0,
+const appObj: ModalSheetRef = {
   id: 'app',
-  children: null,
+  children: undefined,
   open: () => {},
   dismiss: () => {},
   expand: () => {},
   minimize: () => {},
-  scaleX: { value: 1 },
-  translateY: { value: 0 },
-  modalHeight: { value: 0 },
-  borderRadius: { value: 0 },
-  showBackdrop: { value: 0 },
+  scaleX: { value: 1 } as SharedValue<number>,
+  modalHeight: { value: 0 } as SharedValue<number>,
+  borderRadius: { value: 0 } as SharedValue<number>,
+  showBackdrop: { value: 0 } as SharedValue<number>,
   setDisableSheetStackEffect: () => {},
+  minimizedHeight: 0,
 }
 
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
@@ -42,10 +42,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const minimumHeight = useSharedValue(0)
   const y = useSharedValue(MAX_HEIGHT)
   const modalHeight = useSharedValue(0)
-  const dismissValue = useDerivedValue(
-    () => MAX_HEIGHT - (minimumHeight.value === MAX_HEIGHT ? 0 : minimumHeight.value),
-  )
-  const isAtMinimumHeight = useDerivedValue(() => y.value === dismissValue.value)
   const disableSheetStackEffect = useSharedValue<1 | 0>(0)
   const backdropColor = useSharedValue('black')
   const backdropOpacity = useSharedValue(0.3)
@@ -118,7 +114,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         removeModalFromStack,
         activeIndex,
         modalStack,
-        isAtMinimumHeight,
         minimumHeight,
         backdropColor,
         backdropOpacity,

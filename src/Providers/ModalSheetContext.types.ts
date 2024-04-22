@@ -9,11 +9,10 @@ export interface ModalSheetContextBaseType {
   removeModalFromStack: (modalId: string) => void
   activeIndex: SharedValue<number>
   modalStack: ModalSheetRef[]
-  isAtMinimumHeight: SharedValue<boolean>
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
-  disableSheetStackEffect: SharedValue<1 | 0>
+  disableSheetStackEffect: SharedValue<number>
   modalRefs: MutableRefObject<Record<string, ModalSheetRef>>
   expand: (
     name: string,
@@ -24,9 +23,9 @@ export interface ModalSheetContextBaseType {
   updateModalHeight: (value: number) => void
 }
 
-export type ModalSheetInternalContextType = ModalSheetContextBaseType
-
-export type ModalSheetContextType = Pick<
+export type ModalSheetInternalContextType = Omit<
   ModalSheetContextBaseType,
-  'open' | 'dismiss' | 'expand'
+  'expand' | 'open' | 'dismiss'
 >
+
+export type ModalSheetContextType = null
