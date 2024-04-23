@@ -71,6 +71,7 @@ export default function App() {
           modal1.current?.expand(HEIGHT / 2)
         }}
       />
+
       <ModalSheet
         name="modal1"
         backdropColor="white"
@@ -97,6 +98,16 @@ export default function App() {
           />
         </View>
       </ModalSheet>
+      <View
+        style={{
+          height: 70,
+          backgroundColor: 'red',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      />
 
       <ModalSheet name="modal2" backdropColor="white" backdropOpacity={0.5} ref={modal2}>
         <View style={{ flex: 1, backgroundColor: 'white' }}>

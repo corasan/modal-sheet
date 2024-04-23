@@ -81,12 +81,10 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   }
 
   const updateY = (value: number) => {
-    'worklet'
     y.value = value
   }
 
   const updateModalHeight = (value: number) => {
-    'worklet'
     modalHeight.value = value
   }
 

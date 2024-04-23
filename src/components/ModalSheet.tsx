@@ -122,7 +122,8 @@ export const ModalSheet = forwardRef<
     const modalStyle = useAnimatedStyle(() => {
       return {
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
-        borderRadius: borderRadius.value,
+        borderTopLeftRadius: borderRadius.value,
+        borderTopRightRadius: borderRadius.value,
         height: modalHeight.value,
         transform: [
           {
@@ -133,15 +134,17 @@ export const ModalSheet = forwardRef<
     })
     const shadowStyle = useAnimatedStyle(() => {
       return {
+        borderTopLeftRadius: borderRadius.value,
+        borderTopRightRadius: borderRadius.value,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -6 },
+        shadowRadius: 8,
         shadowOpacity: interpolateClamp(
           modalHeight.value,
           [0, minimumHeight.value],
           [0, 0.08],
         ),
-        shadowRadius: 8,
-        backdropColor: 'white',
+        backgroundColor: 'white',
         position: 'absolute',
         bottom: 0,
         left: 0,
@@ -193,7 +196,7 @@ export const ModalSheet = forwardRef<
         behindModalRef.showBackdrop.value = animateClose(1)
       }
       if (minimizedHeight !== undefined) {
-        setTimeout(() => setShouldTeleport(false), 1000)
+        setTimeout(() => setShouldTeleport(false), 200)
       }
       removeModalFromStack(name)
     }
@@ -228,7 +231,6 @@ export const ModalSheet = forwardRef<
         modalHeight.value = animateClose(height)
         return
       }
-      setShouldTeleport(true)
       dismiss()
     }, [])
 
@@ -275,35 +277,34 @@ export const ModalSheet = forwardRef<
     return (
       <>
         {!shouldTeleport ? (
-          <>
-            <Animated.View style={[shadowStyle]}>
-              <Animated.View
-                style={[
-                  styles.container,
-                  props.containerStyle,
-                  styles.permanentContainer,
-                  modalStyle,
-                ]}
-              >
-                <GestureDetector gesture={gesture}>
-                  <View style={styles.handleContainer}>
-                    {!noHandle && <View style={styles.handle} />}
-                  </View>
-                </GestureDetector>
-                <View style={{ flex: 1 }}>{children}</View>
-              </Animated.View>
+          <Animated.View style={shadowStyle}>
+            <Animated.View
+              style={[
+                styles.container,
+                props.containerStyle,
+                styles.permanentContainer,
+                modalStyle,
+              ]}
+            >
+              <GestureDetector gesture={gesture}>
+                <View style={styles.handleContainer}>
+                  {!noHandle && <View style={styles.handle} />}
+                </View>
+              </GestureDetector>
+              <View style={{ flex: 1 }}>{children}</View>
             </Animated.View>
-          </>
+          </Animated.View>
         ) : (
           <Portal hostName="modalSheet">
             <Animated.View style={[styles.backdrop, backdropStyles]} />
-            <Animated.View style={[shadowStyle]}>
+            <Animated.View style={shadowStyle}>
               <Animated.View
                 style={[
                   styles.container,
                   props.containerStyle,
                   styles.permanentContainer,
                   modalStyle,
+                  shadowStyle,
                 ]}
               >
                 <GestureDetector gesture={gesture}>
@@ -323,14 +324,13 @@ export const ModalSheet = forwardRef<
 
 const styles = StyleSheet.create({
   permanentContainer: {
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    overflow: 'hidden',
+    // position: 'absolute',
+    // bottom: 0,
+    // left: 0,
+    // right: 0,
   },
   container: {
     backgroundColor: 'white',
-    borderRadius: 40,
   },
   handleContainer: {
     height: 40,
