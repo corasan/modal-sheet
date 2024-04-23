@@ -10,6 +10,20 @@ import { MutableRefObject } from 'react'
 
 export type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
+export interface ModalSheetStackRef {
+  open: () => void
+  dismiss: () => void
+  id: string
+}
+
+export interface ModalSheetStackProps {
+  name: string
+  containerStyle?: AnimatedStyle<ViewStyle>
+  noHandle?: boolean
+  backdropColor?: string
+  backdropOpacity?: number
+}
+
 export interface ModalSheetRef {
   open: () => void
   dismiss: () => void
@@ -24,7 +38,6 @@ export interface ModalSheetRef {
   id: string
   children?: React.ReactNode
 }
-
 export interface ModalSheetProps {
   name: string
   containerStyle?: AnimatedStyle<ViewStyle>
@@ -42,11 +55,14 @@ export interface ModalSheetProps {
   onGestureTouchesUp?: (e: GestureTouchEvent) => void
   onGestureTouchesMove?: (e: GestureTouchEvent) => void
   onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
-  ref: React.RefObject<ModalSheetRef>
+}
+
+export interface ModalSheetStackProps {
+  children: React.ReactNode
 }
 
 export interface ModalSheetContextBaseType {
-  registerModal: (modalId: string, ref: MutableRefObject<ModalSheetRef>) => void
+  registerModal: (modalId: string, ref: ModalSheetRef | ModalSheetStackRef) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
   removeModalFromStack: (modalId: string) => void
