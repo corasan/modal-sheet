@@ -31,16 +31,18 @@ export const ModalSheet = forwardRef<
       backdropOpacity,
       minimizedHeight,
       children,
+      sizes = [150, 500],
+      offset = 0,
       ...props
     },
     ref,
   ) => {
     const {
-      registerModal,
-      addModalToStack,
-      removeModalFromStack,
-      activeIndex,
-      modalStack,
+      registerDrawerSheet,
+      addDrawerSheetToStack,
+      removeDrawerSheetFromStack,
+      drawerActiveIndex,
+      drawerSheetStack,
       disableSheetStackEffect,
       minimumHeight,
       backdropColor: bckdropColor,
@@ -49,12 +51,12 @@ export const ModalSheet = forwardRef<
     } = useInternal()
     const { MAX_HEIGHT, MODAL_SHEET_HEIGHT, HEADER_HEIGHT, SCREEN_HEIGHT } =
       useConstants()
-    const modalHeight = useSharedValue(0)
-    const dismissHeight = useDerivedValue(() => (!minimizedHeight ? 0 : minimizedHeight))
+    const modalHeight = useSharedValue(sizes[0])
+    // const dismissHeight = useDerivedValue(() => (!sizes[0] ? 0 : minimizedHeight))
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
-    const [shouldTeleport, setShouldTeleport] = useState(true)
+    const [shouldTeleport, setShouldTeleport] = useState(false)
     const gesture = Gesture.Pan()
       .onBegin((e) => props.onGestureBegin?.(e))
       .onStart((e) => props.onGestureStarts?.(e))
@@ -72,19 +74,19 @@ export const ModalSheet = forwardRef<
           props.onGestureUpdate(e)
           return
         }
-        if (activeIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
+        if (drawerActiveIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
           return
-        } else if (activeIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
+        } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
           return
         }
         const moveVal = SCREEN_HEIGHT - e.absoluteY
         modalHeight.value = moveVal
-        if (!disableSheetStackEffect.value && activeIndex.value === 1) {
+        if (!disableSheetStackEffect.value && drawerActiveIndex.value === 1) {
           updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
         }
         // Animate the modal behind if there is a stack of modals
         // When the current modal is dragged, the modal behind animates with it
-        const behindModalRef = modalStack[activeIndex.value - 1]
+        const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
         if (behindModalRef) {
           const val = interpolateClamp(
             moveVal,
@@ -94,7 +96,7 @@ export const ModalSheet = forwardRef<
           behindModalRef.modalHeight.value = val
           behindModalRef.scaleX.value = interpolateClamp(
             moveVal,
-            [dismissHeight.value, MODAL_SHEET_HEIGHT],
+            [sizes[0], MODAL_SHEET_HEIGHT],
             [1, 0.96],
           )
         }
@@ -107,19 +109,23 @@ export const ModalSheet = forwardRef<
         if (e.translationY < 0) {
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
           showBackdrop.value = animateOpen(1)
-          if (activeIndex.value === 0) {
+          if (drawerActiveIndex.value === 0) {
             updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
           }
-          runOnJS(addModalToStack)(name)
+          runOnJS(addDrawerSheetToStack)(name)
         } else {
-          modalHeight.value = animateClose(dismissHeight.value)
+          modalHeight.value = animateClose(sizes[0])
           showBackdrop.value = animateClose(0)
-          updateModalHeight(animateClose(dismissHeight.value))
-          runOnJS(removeModalFromStack)(name)
+          updateModalHeight(animateClose(sizes[0]))
+          runOnJS(removeDrawerSheetFromStack)(name)
         }
       })
 
     const modalStyle = useAnimatedStyle(() => {
+      const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
+      if (behindModalRef) {
+        console.log('behindModalRef', behindModalRef.modalHeight.value)
+      }
       return {
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
         borderTopLeftRadius: borderRadius.value,
@@ -144,11 +150,6 @@ export const ModalSheet = forwardRef<
           [0, minimumHeight.value],
           [0, 0.08],
         ),
-        backgroundColor: 'white',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -158,89 +159,75 @@ export const ModalSheet = forwardRef<
       }
     })
 
-    const open = () => {
-      setShouldTeleport(true)
-      disableSheetStackEffect.value = 0
-      modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
-      showBackdrop.value = animateOpen(1)
-      if (activeIndex.value === 0) {
-        // If there is no modal in the stack, update the modal height
-        // This value is used to animate the app container when the modal is opened
-        updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
-      }
-      addModalToStack(name)
-      // Animate the modal behind if there is a stack of modals
-      // When a new modal is opened, the previous modal should be moved to the back
-      const behindModalRef = modalStack[activeIndex.value]
-      if (behindModalRef) {
-        behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
-        behindModalRef.scaleX.value = animateClose(0.96)
-        behindModalRef.borderRadius.value = animateClose(24)
-        behindModalRef.showBackdrop.value = animateClose(0)
-      }
-    }
-
-    const dismiss = () => {
-      modalHeight.value = animateClose(dismissHeight.value)
-      showBackdrop.value = animateClose(0)
-      if (activeIndex.value === 1) {
-        updateModalHeight(animateClose(dismissHeight.value))
-      }
-      // Animate the modal behind if there is a stack of modals
-      // When the modal is dismissed, the modal behind should be moved to the top
-      const behindModalRef = modalStack[activeIndex.value - 1]
-      if (behindModalRef) {
-        behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
-        behindModalRef.scaleX.value = animateClose(1)
-        behindModalRef.borderRadius.value = animateClose(40)
-        behindModalRef.showBackdrop.value = animateClose(1)
-      }
-      if (minimizedHeight !== undefined) {
-        setTimeout(() => setShouldTeleport(false), 200)
-      }
-      removeModalFromStack(name)
-    }
-
     // This function is used to expand the modal to a specific height
     // If the height is not provided, the modal will expand to its maximum height
-    const expand = useCallback((height?: number, disableSheetEffect?: boolean) => {
-      'worklet'
-      setShouldTeleport(true)
-      showBackdrop.value = animateOpen(activeIndex.value + 1)
-      if (disableSheetEffect !== undefined) {
-        disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
-      }
-      if (height) {
-        modalHeight.value = animateOpen(height)
-        return
-      }
-      disableSheetStackEffect.value = 0
-      open()
-    }, [])
+    const expand = useCallback(
+      (full?: boolean) => {
+        console.log('pressed', drawerActiveIndex.value)
+        setShouldTeleport(true)
+        showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
+        // if (disableSheetEffect !== undefined) {
+        //   disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
+        // }
+        // if (height) {
+        //   modalHeight.value = animateOpen(height)
+        //   return
+        // }
+        // disableSheetStackEffect.value = 0
+        // open()
+        // modalHeight.value = animateOpen(sizes[1])
+        if (full) {
+          addDrawerSheetToStack(name)
+          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT - offset)
+          // Animate the modal behind if there is a stack of modals
+          // When a new modal is opened, the previous modal should be moved to the back
+          const behindModalRef = drawerSheetStack[drawerActiveIndex.value]
+          if (behindModalRef) {
+            behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT - offset + 5)
+            behindModalRef.scaleX.value = animateClose(0.96)
+            behindModalRef.borderRadius.value = animateClose(24)
+            behindModalRef.showBackdrop.value = animateClose(0)
+          }
+          return
+        }
+        if (modalHeight.value === sizes[0]) {
+          modalHeight.value = animateOpen(sizes[1])
+        } else if (modalHeight.value === sizes[1]) {
+          modalHeight.value = animateOpen(sizes[2] || MODAL_SHEET_HEIGHT - offset)
+        } else {
+          modalHeight.value = animateOpen(sizes[0] + offset)
+        }
+      },
+      [drawerSheetStack],
+    )
 
     // This function is used to minimize the modal to a specific height
     // If the height is not provided, the modal will minimize to its minimized height
-    const minimize = useCallback((height?: number) => {
-      'worklet'
-      setShouldTeleport(false)
+    const minimize = useCallback(() => {
+      setTimeout(() => {
+        setShouldTeleport(false)
+      }, 300)
       showBackdrop.value = animateClose(0)
-      if (disableSheetStackEffect.value) {
-        disableSheetStackEffect.value = 0
+      if (drawerSheetStack.length > 0) {
+        const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
+        if (behindModalRef) {
+          behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT - offset)
+          behindModalRef.scaleX.value = animateClose(1)
+          behindModalRef.borderRadius.value = animateClose(40)
+          behindModalRef.showBackdrop.value = animateClose(1)
+        }
+        removeDrawerSheetFromStack(name)
       }
-      if (height) {
-        modalHeight.value = animateClose(height)
-        return
-      }
-      dismiss()
-    }, [])
+      modalHeight.value = animateClose(sizes[0])
+    }, [drawerSheetStack])
 
     const setDisableSheetStackEffect = useCallback((value: 1 | 0) => {
       disableSheetStackEffect.value = value
     }, [])
 
     useImperativeHandle(ref, () => ({
-      open,
-      dismiss,
+      // open,
+      // dismiss,
       scaleX,
       borderRadius,
       minimizedHeight,
@@ -255,7 +242,7 @@ export const ModalSheet = forwardRef<
     useEffect(() => {
       // Register the modal with the context
       if (ref && 'current' in ref && ref.current) {
-        registerModal(name, ref.current)
+        registerDrawerSheet(name, ref.current)
       }
     }, [name, ref])
 
@@ -267,25 +254,20 @@ export const ModalSheet = forwardRef<
       if (backdropOpacity && backdropOpacity !== 0.4) {
         bckdropOpacity.value = backdropOpacity
       }
-      if (minimizedHeight) {
-        setShouldTeleport(false)
-        minimumHeight.value = minimizedHeight
-        modalHeight.value = animateOpen(minimizedHeight)
-      }
-    }, [backdropOpacity, backdropOpacity, minimizedHeight, props.disableSheetStackEffect])
+    }, [backdropOpacity, backdropOpacity, props.disableSheetStackEffect])
 
     return (
       <>
         {!shouldTeleport ? (
-          <Animated.View style={shadowStyle}>
-            <Animated.View
-              style={[
-                styles.container,
-                props.containerStyle,
-                styles.permanentContainer,
-                modalStyle,
-              ]}
-            >
+          <Animated.View
+            style={[
+              styles.container,
+              props.containerStyle,
+              { bottom: offset },
+              shadowStyle,
+            ]}
+          >
+            <Animated.View style={[styles.permanentContainer, modalStyle]}>
               <GestureDetector gesture={gesture}>
                 <View style={styles.handleContainer}>
                   {!noHandle && <View style={styles.handle} />}
@@ -297,16 +279,16 @@ export const ModalSheet = forwardRef<
         ) : (
           <Portal hostName="modalSheet">
             <Animated.View style={[styles.backdrop, backdropStyles]} />
-            <Animated.View style={shadowStyle}>
-              <Animated.View
-                style={[
-                  styles.container,
-                  props.containerStyle,
-                  styles.permanentContainer,
-                  modalStyle,
-                  shadowStyle,
-                ]}
-              >
+            <Animated.View
+              style={[
+                styles.container,
+                props.containerStyle,
+                // { bottom: offset },
+                { paddingBottom: offset },
+                shadowStyle,
+              ]}
+            >
+              <Animated.View style={[styles.permanentContainer, modalStyle]}>
                 <GestureDetector gesture={gesture}>
                   <View style={styles.handleContainer}>
                     {!noHandle && <View style={styles.handle} />}
@@ -328,9 +310,16 @@ const styles = StyleSheet.create({
     // bottom: 0,
     // left: 0,
     // right: 0,
+    flex: 1,
+    overflow: 'hidden',
+    backgroundColor: 'cyan',
   },
   container: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   handleContainer: {
     height: 40,

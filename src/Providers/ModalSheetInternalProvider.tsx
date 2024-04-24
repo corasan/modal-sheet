@@ -37,8 +37,10 @@ const appObj: ModalSheetRef = {
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
   const modalRefs = useRef<Record<string, ModalSheetRef>>({ app: appObj })
+  const drawerSheetRefs = useRef<Record<string, ModalSheetRef>>({})
   const modalRefsObj = modalRefs.current
   const [modalStack, setModalStack] = useState<ModalSheetRef[]>([appObj])
+  const [drawerSheetStack, setDrawerSheetStack] = useState<ModalSheetRef[]>([])
   const minimumHeight = useSharedValue(0)
   const y = useSharedValue(MAX_HEIGHT)
   const modalHeight = useSharedValue(0)
@@ -46,6 +48,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const backdropColor = useSharedValue('black')
   const backdropOpacity = useSharedValue(0.3)
   const activeIndex = useSharedValue(0)
+  const drawerActiveIndex = useSharedValue(0)
   const childrenAanimatedStyles = useAnimatedStyle(() => {
     if (disableSheetStackEffect.value === 1) {
       return {}
@@ -80,6 +83,15 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     }
   }
 
+  const registerDrawerSheet = (modalId: string, ref: any) => {
+    drawerSheetRefs.current[modalId] = {
+      ...{
+        ...ref,
+        index: Object.keys(drawerSheetRefs.current).length,
+      },
+    }
+  }
+
   const updateY = (value: number) => {
     y.value = value
   }
@@ -103,6 +115,24 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     })
   }
 
+  const addDrawerSheetToStack = (modalId: string) => {
+    setDrawerSheetStack((stack) => {
+      const arr = [...stack, drawerSheetRefs.current[modalId]]
+      console.log([...stack, drawerSheetRefs.current[modalId]])
+      drawerActiveIndex.value = arr.length - 1
+      return [...stack, drawerSheetRefs.current[modalId]]
+    })
+  }
+  const removeDrawerSheetFromStack = (modalId: string) => {
+    setDrawerSheetStack((stack) => {
+      const arr = stack.filter((m) => m.id !== modalId)
+      drawerActiveIndex.value = arr.length - 1
+      return arr
+    })
+  }
+
+  console.log('drawerSheetStack', drawerSheetStack)
+
   return (
     <ModalSheetInternalContext.Provider
       value={{
@@ -118,6 +148,12 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         disableSheetStackEffect,
         updateModalHeight,
         modalRefs,
+        drawerSheetRefs,
+        registerDrawerSheet,
+        addDrawerSheetToStack,
+        removeDrawerSheetFromStack,
+        drawerSheetStack,
+        drawerActiveIndex,
       }}
     >
       <View style={styles.container}>

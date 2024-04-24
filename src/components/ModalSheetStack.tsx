@@ -31,7 +31,6 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
       activeIndex,
       modalStack,
       disableSheetStackEffect,
-      minimumHeight,
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
       updateModalHeight,
@@ -100,25 +99,25 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
         ],
       }
     })
-    const shadowStyle = useAnimatedStyle(() => {
-      return {
-        borderTopLeftRadius: borderRadius.value,
-        borderTopRightRadius: borderRadius.value,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -6 },
-        shadowRadius: 8,
-        shadowOpacity: interpolateClamp(
-          modalHeight.value,
-          [0, minimumHeight.value],
-          [0, 0.08],
-        ),
-        backgroundColor: 'white',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-      }
-    })
+    // const shadowStyle = useAnimatedStyle(() => {
+    //   return {
+    //     borderTopLeftRadius: borderRadius.value,
+    //     borderTopRightRadius: borderRadius.value,
+    //     shadowColor: '#000',
+    //     shadowOffset: { width: 0, height: -6 },
+    //     shadowRadius: 8,
+    //     shadowOpacity: interpolateClamp(
+    //       modalHeight.value,
+    //       [0, minimumHeight.value],
+    //       [0, 0.08],
+    //     ),
+    //     backgroundColor: 'white',
+    //     position: 'absolute',
+    //     bottom: 0,
+    //     left: 0,
+    //     right: 0,
+    //   }
+    // })
     const backdropStyles = useAnimatedStyle(() => {
       return {
         opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, 0.3]),
@@ -190,23 +189,20 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
     return (
       <Portal hostName="modalSheet">
         <Animated.View style={[styles.backdrop, backdropStyles]} />
-        <Animated.View style={shadowStyle}>
-          <Animated.View
-            style={[
-              styles.container,
-              props.containerStyle,
-              styles.permanentContainer,
-              modalStyle,
-              shadowStyle,
-            ]}
-          >
-            <GestureDetector gesture={gesture}>
-              <View style={styles.handleContainer}>
-                {!noHandle && <View style={styles.handle} />}
-              </View>
-            </GestureDetector>
-            <View style={{ flex: 1 }}>{children}</View>
-          </Animated.View>
+        <Animated.View
+          style={[
+            styles.container,
+            props.containerStyle,
+            styles.permanentContainer,
+            modalStyle,
+          ]}
+        >
+          <GestureDetector gesture={gesture}>
+            <View style={styles.handleContainer}>
+              {!noHandle && <View style={styles.handle} />}
+            </View>
+          </GestureDetector>
+          <View style={{ flex: 1 }}>{children}</View>
         </Animated.View>
       </Portal>
     )
@@ -215,10 +211,10 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
 
 const styles = StyleSheet.create({
   permanentContainer: {
-    // position: 'absolute',
-    // bottom: 0,
-    // left: 0,
-    // right: 0,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   container: {
     backgroundColor: 'white',

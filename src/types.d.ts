@@ -27,7 +27,7 @@ export interface ModalSheetStackProps {
 export interface ModalSheetRef {
   open: () => void
   dismiss: () => void
-  expand: (height?: number, disableSheetEffect?: boolean) => void
+  expand: (full?: boolean, disableSheetEffect?: boolean) => void
   minimize: (height?: number) => void
   setDisableSheetStackEffect: (value: 1 | 0) => void
   scaleX: SharedValue<number>
@@ -55,6 +55,8 @@ export interface ModalSheetProps {
   onGestureTouchesUp?: (e: GestureTouchEvent) => void
   onGestureTouchesMove?: (e: GestureTouchEvent) => void
   onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
+  sizes?: [number, number, number?, number?]
+  offset: number
 }
 
 export interface ModalSheetStackProps {
@@ -62,17 +64,22 @@ export interface ModalSheetStackProps {
 }
 
 export interface ModalSheetContextBaseType {
-  registerModal: (modalId: string, ref: ModalSheetRef | ModalSheetStackRef) => void
+  registerModal: (modalId: string, ref: ModalSheetStackRef) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
   removeModalFromStack: (modalId: string) => void
+  addDrawerSheetToStack: (modalId: string) => void
+  removeDrawerSheetFromStack: (modalId: string) => void
   activeIndex: SharedValue<number>
+  drawerActiveIndex: SharedValue<number>
   modalStack: ModalSheetRef[]
+  drawerSheetStack: ModalSheetRef[]
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
   disableSheetStackEffect: SharedValue<number>
   modalRefs: MutableRefObject<Record<string, ModalSheetRef>>
+  drawerSheetRefs: MutableRefObject<Record<string, ModalSheetRef>>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },
@@ -80,6 +87,7 @@ export interface ModalSheetContextBaseType {
   open: (name: string) => void
   dismiss: (name?: string) => void
   updateModalHeight: (value: number) => void
+  registerDrawerSheet: (modalId: string, ref: ModalSheetRef) => void
 }
 
 export type ModalSheetInternalContextType = Omit<
