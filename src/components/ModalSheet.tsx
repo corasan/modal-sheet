@@ -220,7 +220,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       minimize,
       modalHeight,
       showBackdrop,
-      setShouldTeleport,
     }))
 
     useEffect(() => {
