@@ -25,7 +25,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       noHandle = false,
       backdropColor,
       backdropOpacity,
-      minimizedHeight,
       children,
       sizes = [100, 300, 500],
       offset = 0,
@@ -40,7 +39,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       drawerActiveIndex,
       drawerSheetStack,
       disableSheetStackEffect,
-      minimumHeight,
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
     } = useInternal()
@@ -77,11 +75,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -6 },
         shadowRadius: 8,
-        shadowOpacity: interpolateClamp(
-          modalHeight.value,
-          [0, minimumHeight.value],
-          [0, 0.08],
-        ),
+        shadowOpacity: interpolateClamp(modalHeight.value, [0, sizes[0]], [0, 0.04]),
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -223,11 +217,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       })
 
     useImperativeHandle(ref, () => ({
-      // open,
-      // dismiss,
       scaleX,
       borderRadius,
-      minimizedHeight,
       id: name,
       expand,
       minimize,
@@ -279,8 +270,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
               style={[
                 styles.container,
                 props.containerStyle,
-                // { bottom: offset },
-                { paddingBottom: offset },
+                { bottom: offset },
                 shadowStyle,
               ]}
             >
@@ -302,16 +292,12 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
 const styles = StyleSheet.create({
   permanentContainer: {
-    // position: 'absolute',
-    // bottom: 0,
-    // left: 0,
-    // right: 0,
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: 'cyan',
+    backgroundColor: 'transparent',
   },
   container: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
     position: 'absolute',
     bottom: 0,
     left: 0,
