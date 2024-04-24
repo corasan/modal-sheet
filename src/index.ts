@@ -1,5 +1,19 @@
 import { ModalSheetProvider } from './Providers/ModalSheetProvider'
 import { ModalSheet } from './components/ModalSheet'
-import { ModalSheetRef, ModalSheetProps } from './types'
+import { ModalSheetStack } from './components/ModalSheetStack'
+import type {
+  ModalSheetRef,
+  ModalSheetProps,
+  ModalSheetStackProps,
+  ModalSheetStackRef,
+} from './types'
 
-export { ModalSheet, ModalSheetProvider, ModalSheetProps, ModalSheetRef }
+export {
+  ModalSheet,
+  ModalSheetProvider,
+  ModalSheetProps,
+  ModalSheetRef,
+  ModalSheetStack,
+  ModalSheetStackProps,
+  ModalSheetStackRef,
+}

@@ -1,5 +1,5 @@
 > [!WARNING]
-> This package is still in development and not fully featured yet. Please use with caution.
+> This package is still in development and not fully featured yet (experimental). Please use with caution.
 
 ## Installation
 
@@ -28,16 +28,17 @@ function App() {
 Use `useModalSheet` hook to open and close the modal sheet.
 
 ```tsx
-import { useModalSheet } from '@corasan/modal-sheet';
+import { ModalSheet, ModalSheetRef, ModalSheetStackRef } from '@corasan/modal-sheet';
 
 function YourComponent() {
-  const { open, dismiss } = useModalSheet();
+  const modalRef = useRef<ModalSheetRef>()
+  const modalSheetRef = useRef<ModalSheetRef>()
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Butto title="Open Modal Sheet" onClick={() => open())} />
+      <Butto title="Open Modal Sheet" onClick={() => modalRef.current.extend())} />
 
-      <ModalSheet>
+      <ModalSheet ref={modalRef} name="modal-drawer" sizes={[100, 300, 600]}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Text style={{ fontWeight: "500", fontSize: 18 }}>Title</Text>
@@ -53,7 +54,29 @@ function YourComponent() {
             <Button
               title="Close Modal"
               onPress={() => {
-                dismiss();
+                modalRef.current.minimize();
+              }}
+            />
+          </View>
+        </View>
+      </ModalSheet>
+      <ModalSheet ref={modalSheetRef} name="modal-sheet" sizes={[100, 300, 600]}>
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <Text style={{ fontWeight: "500", fontSize: 18 }}>Title</Text>
+          </View>
+
+          <View
+            style={{
+              paddingVertical: 40,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              title="Close Modal"
+              onPress={() => {
+                modalRef.current.minimize();
               }}
             />
           </View>
@@ -68,13 +91,20 @@ function YourComponent() {
 
 ### ModalSheet
 
+The `ModalSheet` component is a modal sheet that can be expanded and minimized. It can be used to create a drawer type of modal sheet and can be stacked on top of each other.
+
 | Name | Type | Default  | Description | Required |
 | --- | --- | --- | --- | --- |
-| children | ReactNode | - | The children components | Kinda |
+| ref | React.RefObject\<ModalSheetRef> | - | Ref for the modal sheet | Yes |
+| name | string | - | The name of the modal sheet | Yes |
+| children | ReactNode | - | The children components | Kinda yeah |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
-| minimizedHeight | number | - | The minimum height the modal can be minized | No |
-| disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
+| sizes | number[] | [100, 300, 600] | The sizes the modal can be expanded to | No |
+| backdropColor | string | "black" | The color of the backdrop | No |
+| backdropOpacity | number | 0.4 | The opacity of the backdrop | No |
+| offset | number | 0 | Add an offset at the bottom of the modal sheet when it's minimized | No |
+<!-- | disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
 | onGestureUpdate | (e: GestureUpdateEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle gesture updates | No |
 | onGestureBegin | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture begin | No |
 | onGestureEnd | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture end | No |
@@ -83,9 +113,24 @@ function YourComponent() {
 | onGestureTouchesDown | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch down | No |
 | onGestureTouchesUp | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch up | No |
 | onGestureTouchesMove | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch move | No |
-| onGestureTouchesCancelled | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch cancelled | No |
+| onGestureTouchesCancelled | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch cancelled | No | -->
 
-## Hooks
+### ModalSheetStack
+
+The `ModalSheetStack` component is a modal sheet that can be opened and dismissed. It creates a modal sheet effect similar to the iOS modal sheet.
+
+| Name | Type | Default  | Description | Required |
+| --- | --- | --- | --- | --- |
+| ref | React.RefObject\<ModalSheetStackRef> | - | Ref for the modal sheet | Yes |
+| name | string | - | The name of the modal sheet | Yes |
+| children | ReactNode | - | The children components | Kinda yeah |
+| containerStyle | string | - | Styles for the modal sheet container | No |
+| noHandle | boolean | false | Hide the handle | No |
+| backdropColor | string | "black" | The color of the backdrop | No |
+| backdropOpacity | number | 0.4 | The opacity of the backdrop | No |
+
+
+<!-- ## Hooks
 
 ### useModalSheet
 
@@ -97,4 +142,4 @@ function YourComponent() {
 | open | () => void | Open the modal sheet |
 | dismiss | () => void | Dismiss the modal sheet |
 | expand | (height?: number, disableSheetStack?: boolean) => void | expand to custom height |
-| minimize | (height?: number) => void | Minimize to custom height |
+| minimize | (height?: number) => void | Minimize to custom height | -->

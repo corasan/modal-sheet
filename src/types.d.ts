@@ -10,12 +10,28 @@ import { MutableRefObject } from 'react'
 
 export type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
-export interface ModalSheetRef {
+export interface ModalSheetStackRef {
   open: () => void
   dismiss: () => void
-  expand: (height?: number, disableSheetEffect?: boolean) => void
-  minimize: (height?: number) => void
-  setDisableSheetStackEffect: (value: 1 | 0) => void
+  id: string
+  children?: React.ReactNode
+  modalHeight: SharedValue<number>
+  scaleX: SharedValue<number>
+  borderRadius: SharedValue<number>
+  showBackdrop: SharedValue<number>
+}
+
+export interface ModalSheetStackProps {
+  name: string
+  containerStyle?: AnimatedStyle<ViewStyle>
+  noHandle?: boolean
+  backdropColor?: string
+  backdropOpacity?: number
+}
+
+export interface ModalSheetRef {
+  expand: (index?: 1 | 2 | 'full') => void
+  minimize: (index?: 0 | 1 | 2) => void
   scaleX: SharedValue<number>
   borderRadius: SharedValue<number>
   modalHeight: SharedValue<number>
@@ -24,39 +40,47 @@ export interface ModalSheetRef {
   id: string
   children?: React.ReactNode
 }
-
 export interface ModalSheetProps {
   name: string
   containerStyle?: AnimatedStyle<ViewStyle>
   noHandle?: boolean
   backdropColor?: string
   backdropOpacity?: number
-  minimizedHeight?: number
-  disableSheetStackEffect?: boolean
-  onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
-  onGestureBegin?: (e: GestureEvent) => void
-  onGestureStarts?: (e: GestureEvent) => void
-  onGestureEnd?: (e: GestureEvent) => void
-  onGestureFinalize?: (e: GestureEvent) => void
-  onGestureTouchesDown?: (e: GestureTouchEvent) => void
-  onGestureTouchesUp?: (e: GestureTouchEvent) => void
-  onGestureTouchesMove?: (e: GestureTouchEvent) => void
-  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
-  ref: React.RefObject<ModalSheetRef>
+  sizes?: [number, number, number?]
+  offset: number
+  // minimizedHeight?: number
+  // disableSheetStackEffect?: boolean
+  // onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
+  // onGestureBegin?: (e: GestureEvent) => void
+  // onGestureStarts?: (e: GestureEvent) => void
+  // onGestureEnd?: (e: GestureEvent) => void
+  // onGestureFinalize?: (e: GestureEvent) => void
+  // onGestureTouchesDown?: (e: GestureTouchEvent) => void
+  // onGestureTouchesUp?: (e: GestureTouchEvent) => void
+  // onGestureTouchesMove?: (e: GestureTouchEvent) => void
+  // onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
+}
+
+export interface ModalSheetStackProps {
+  children: React.ReactNode
 }
 
 export interface ModalSheetContextBaseType {
-  registerModal: (modalId: string, ref: MutableRefObject<ModalSheetRef>) => void
+  registerModal: (modalId: string, ref: ModalSheetStackRef) => void
+  registerDrawerSheet: (modalId: string, ref: ModalSheetRef) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
   removeModalFromStack: (modalId: string) => void
+  addDrawerSheetToStack: (modalId: string) => void
+  removeDrawerSheetFromStack: (modalId: string) => void
   activeIndex: SharedValue<number>
-  modalStack: ModalSheetRef[]
+  drawerActiveIndex: SharedValue<number>
+  modalStack: ModalSheetStackRef[]
+  drawerSheetStack: ModalSheetRef[]
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
   disableSheetStackEffect: SharedValue<number>
-  modalRefs: MutableRefObject<Record<string, ModalSheetRef>>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },
