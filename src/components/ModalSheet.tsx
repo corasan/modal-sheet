@@ -12,17 +12,13 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
-import { ModalSheetProps } from '../types'
+import { ModalSheetProps, ModalSheetRef } from '../types'
 import { useInternal } from '../hooks/useInternal'
 
-export const ModalSheet = forwardRef<
-  typeof ModalSheet,
-  PropsWithChildren<ModalSheetProps>
->(
+export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheetProps>>(
   (
     {
       name,
@@ -56,7 +52,6 @@ export const ModalSheet = forwardRef<
       SWIPE_VELOCITY_THRESHOLD,
     } = useConstants()
     const modalHeight = useSharedValue(sizes[0])
-    // const dismissHeight = useDerivedValue(() => (!sizes[0] ? 0 : minimizedHeight))
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
@@ -148,41 +143,12 @@ export const ModalSheet = forwardRef<
           return
         }
         modalHeight.value = animateClose(sizes[index] ?? sizes[0])
-        // if (!index) {
-        //   if (sizes[2] && modalHeight.value > sizes[2]) {
-        //     modalHeight.value = animateClose(sizes[2])
-        //   } else if (modalHeight.value > sizes[1]) {
-        //     modalHeight.value = animateClose(sizes[1])
-        //   } else {
-        //     modalHeight.value = animateClose(sizes[0])
-        //   }
-        // } else {
-        // }
       },
       [drawerSheetStack],
     )
 
-    const setDisableSheetStackEffect = useCallback((value: 1 | 0) => {
-      disableSheetStackEffect.value = value
-    }, [])
-
     const gesture = Gesture.Pan()
-      .onBegin((e) => props.onGestureBegin?.(e))
-      .onStart((e) => props.onGestureStarts?.(e))
-      .onFinalize((e) => props.onGestureFinalize?.(e))
-      .onTouchesDown((e) => {
-        if (props.onGestureTouchesDown) {
-          runOnJS(props.onGestureTouchesDown)(e)
-        }
-      })
-      .onTouchesUp((e) => props.onGestureTouchesUp?.(e))
-      .onTouchesMove((e) => props.onGestureTouchesMove?.(e))
-      .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
       .onUpdate((e) => {
-        // if (props.onGestureUpdate) {
-        //   props.onGestureUpdate(e)
-        //   return
-        // }
         if (drawerActiveIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
           return
         } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
@@ -265,7 +231,6 @@ export const ModalSheet = forwardRef<
       id: name,
       expand,
       minimize,
-      setDisableSheetStackEffect,
       modalHeight,
       showBackdrop,
     }))

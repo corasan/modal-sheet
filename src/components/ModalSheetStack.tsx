@@ -1,13 +1,5 @@
 import { Portal } from '@gorhom/portal'
-import {
-  PropsWithChildren,
-  Ref,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from 'react'
+import { PropsWithChildren, forwardRef, useEffect, useImperativeHandle } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, {
@@ -19,7 +11,10 @@ import { animateClose, animateOpen, interpolateClamp, useConstants } from '../ut
 import { ModalSheetStackProps, ModalSheetStackRef } from '../types'
 import { useInternal } from '../hooks/useInternal'
 
-export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackProps>(
+export const ModalSheetStack = forwardRef<
+  ModalSheetStackRef,
+  PropsWithChildren<ModalSheetStackProps>
+>(
   (
     { name, noHandle = false, backdropColor, backdropOpacity, children, ...props },
     ref,
@@ -99,25 +94,6 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
         ],
       }
     })
-    // const shadowStyle = useAnimatedStyle(() => {
-    //   return {
-    //     borderTopLeftRadius: borderRadius.value,
-    //     borderTopRightRadius: borderRadius.value,
-    //     shadowColor: '#000',
-    //     shadowOffset: { width: 0, height: -6 },
-    //     shadowRadius: 8,
-    //     shadowOpacity: interpolateClamp(
-    //       modalHeight.value,
-    //       [0, minimumHeight.value],
-    //       [0, 0.08],
-    //     ),
-    //     backgroundColor: 'white',
-    //     position: 'absolute',
-    //     bottom: 0,
-    //     left: 0,
-    //     right: 0,
-    //   }
-    // })
     const backdropStyles = useAnimatedStyle(() => {
       return {
         opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, 0.3]),
@@ -168,6 +144,10 @@ export const ModalSheetStack = forwardRef<ModalSheetStackRef, ModalSheetStackPro
       open,
       dismiss,
       id: name,
+      modalHeight,
+      scaleX,
+      borderRadius,
+      showBackdrop,
     }))
 
     useEffect(() => {

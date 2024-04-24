@@ -14,6 +14,11 @@ export interface ModalSheetStackRef {
   open: () => void
   dismiss: () => void
   id: string
+  children?: React.ReactNode
+  modalHeight: SharedValue<number>
+  scaleX: SharedValue<number>
+  borderRadius: SharedValue<number>
+  showBackdrop: SharedValue<number>
 }
 
 export interface ModalSheetStackProps {
@@ -25,11 +30,8 @@ export interface ModalSheetStackProps {
 }
 
 export interface ModalSheetRef {
-  open: () => void
-  dismiss: () => void
-  expand: (index?: 0 | 1 | 'full') => void
-  minimize: (height?: number) => void
-  setDisableSheetStackEffect: (value: 1 | 0) => void
+  expand: (index?: 1 | 2 | 'full') => void
+  minimize: (index?: 0 | 1 | 2) => void
   scaleX: SharedValue<number>
   borderRadius: SharedValue<number>
   modalHeight: SharedValue<number>
@@ -65,6 +67,7 @@ export interface ModalSheetStackProps {
 
 export interface ModalSheetContextBaseType {
   registerModal: (modalId: string, ref: ModalSheetStackRef) => void
+  registerDrawerSheet: (modalId: string, ref: ModalSheetRef) => void
   updateY: (value: number) => void
   addModalToStack: (modalId: string) => void
   removeModalFromStack: (modalId: string) => void
@@ -72,14 +75,12 @@ export interface ModalSheetContextBaseType {
   removeDrawerSheetFromStack: (modalId: string) => void
   activeIndex: SharedValue<number>
   drawerActiveIndex: SharedValue<number>
-  modalStack: ModalSheetRef[]
+  modalStack: ModalSheetStackRef[]
   drawerSheetStack: ModalSheetRef[]
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
   disableSheetStackEffect: SharedValue<number>
-  modalRefs: MutableRefObject<Record<string, ModalSheetRef>>
-  drawerSheetRefs: MutableRefObject<Record<string, ModalSheetRef>>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },
@@ -87,7 +88,6 @@ export interface ModalSheetContextBaseType {
   open: (name: string) => void
   dismiss: (name?: string) => void
   updateModalHeight: (value: number) => void
-  registerDrawerSheet: (modalId: string, ref: ModalSheetRef) => void
 }
 
 export type ModalSheetInternalContextType = Omit<

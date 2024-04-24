@@ -1,45 +1,40 @@
 import { PortalProvider } from '@gorhom/portal'
-import { PropsWithChildren, useCallback, useRef, useState } from 'react'
+import { PropsWithChildren, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
   SharedValue,
   interpolate,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
 
 import { ModalSheetInternalContext } from './InternalContext'
 import { useConstants } from '../utils'
-import { ModalSheetRef } from '../types'
+import { ModalSheetRef, ModalSheetStackRef } from '../types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
   'worklet'
   return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
 }
 
-const appObj: ModalSheetRef = {
+const appObj: ModalSheetStackRef = {
   id: 'app',
   children: undefined,
   open: () => {},
   dismiss: () => {},
-  expand: () => {},
-  minimize: () => {},
-  scaleX: { value: 1 } as SharedValue<number>,
   modalHeight: { value: 0 } as SharedValue<number>,
+  scaleX: { value: 1 } as SharedValue<number>,
   borderRadius: { value: 0 } as SharedValue<number>,
   showBackdrop: { value: 0 } as SharedValue<number>,
-  setDisableSheetStackEffect: () => {},
-  minimizedHeight: 0,
 }
 
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
-  const modalRefs = useRef<Record<string, ModalSheetRef>>({ app: appObj })
+  const modalRefs = useRef<Record<string, ModalSheetStackRef>>({ app: appObj })
   const drawerSheetRefs = useRef<Record<string, ModalSheetRef>>({})
   const modalRefsObj = modalRefs.current
-  const [modalStack, setModalStack] = useState<ModalSheetRef[]>([appObj])
+  const [modalStack, setModalStack] = useState<ModalSheetStackRef[]>([appObj])
   const [drawerSheetStack, setDrawerSheetStack] = useState<ModalSheetRef[]>([])
   const minimumHeight = useSharedValue(0)
   const y = useSharedValue(MAX_HEIGHT)
@@ -145,8 +140,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         backdropOpacity,
         disableSheetStackEffect,
         updateModalHeight,
-        modalRefs,
-        drawerSheetRefs,
         registerDrawerSheet,
         addDrawerSheetToStack,
         removeDrawerSheetFromStack,
