@@ -46,19 +46,19 @@ export interface ModalSheetProps {
   noHandle?: boolean
   backdropColor?: string
   backdropOpacity?: number
-  minimizedHeight?: number
-  disableSheetStackEffect?: boolean
-  onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
-  onGestureBegin?: (e: GestureEvent) => void
-  onGestureStarts?: (e: GestureEvent) => void
-  onGestureEnd?: (e: GestureEvent) => void
-  onGestureFinalize?: (e: GestureEvent) => void
-  onGestureTouchesDown?: (e: GestureTouchEvent) => void
-  onGestureTouchesUp?: (e: GestureTouchEvent) => void
-  onGestureTouchesMove?: (e: GestureTouchEvent) => void
-  onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
   sizes?: [number, number, number?]
   offset: number
+  // minimizedHeight?: number
+  // disableSheetStackEffect?: boolean
+  // onGestureUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void
+  // onGestureBegin?: (e: GestureEvent) => void
+  // onGestureStarts?: (e: GestureEvent) => void
+  // onGestureEnd?: (e: GestureEvent) => void
+  // onGestureFinalize?: (e: GestureEvent) => void
+  // onGestureTouchesDown?: (e: GestureTouchEvent) => void
+  // onGestureTouchesUp?: (e: GestureTouchEvent) => void
+  // onGestureTouchesMove?: (e: GestureTouchEvent) => void
+  // onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
 }
 
 export interface ModalSheetStackProps {
