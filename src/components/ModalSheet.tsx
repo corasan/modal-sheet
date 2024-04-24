@@ -270,14 +270,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         ) : (
           <Portal hostName="modalSheet">
             <Animated.View style={[styles.backdrop, backdropStyles]} />
-            <Animated.View
-              style={[
-                styles.container,
-                props.containerStyle,
-                // { paddingBottom: offset },
-                shadowStyle,
-              ]}
-            >
+            <Animated.View style={[styles.container, props.containerStyle, shadowStyle]}>
               <Animated.View style={[styles.permanentContainer, modalStyle]}>
                 <GestureDetector gesture={gesture}>
                   <View style={styles.handleContainer}>
