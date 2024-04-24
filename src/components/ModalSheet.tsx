@@ -23,8 +23,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     {
       name,
       noHandle = false,
-      backdropColor,
-      backdropOpacity,
+      backdropColor = 'black',
+      backdropOpacity = 0.4,
       children,
       sizes = [100, 300, 500],
       offset = 0,
@@ -38,9 +38,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       removeDrawerSheetFromStack,
       drawerActiveIndex,
       drawerSheetStack,
-      disableSheetStackEffect,
-      backdropColor: bckdropColor,
-      backdropOpacity: bckdropOpacity,
+      modalStack,
     } = useInternal()
     const {
       MAX_HEIGHT,
@@ -54,6 +52,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
     const [shouldTeleport, setShouldTeleport] = useState(false)
+    const [prevHeights, setPrevHeights] = useState({})
 
     const modalStyle = useAnimatedStyle(() => {
       return {
@@ -61,11 +60,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
         height: modalHeight.value,
-        transform: [
-          {
-            scaleX: scaleX.value,
-          },
-        ],
       }
     })
     const shadowStyle = useAnimatedStyle(() => {
@@ -76,12 +70,14 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         shadowOffset: { width: 0, height: -6 },
         shadowRadius: 8,
         shadowOpacity: interpolateClamp(modalHeight.value, [0, sizes[0]], [0, 0.04]),
+        transform: [{ scaleX: scaleX.value }],
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
       return {
-        opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, 0.3]),
+        opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, backdropOpacity]),
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [-1, 0]),
+        backgroundColor: backdropColor,
       }
     })
 
@@ -93,12 +89,12 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
         if (index === 'full' || !index) {
           addDrawerSheetToStack(name)
-          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT - offset)
+          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
           // Animate the modal behind if there is a stack of modals
           // When a new modal is opened, the previous modal should be moved to the back
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value]
           if (behindModalRef) {
-            behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT - offset + 5)
+            behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
             behindModalRef.scaleX.value = animateClose(0.96)
             behindModalRef.borderRadius.value = animateClose(24)
             behindModalRef.showBackdrop.value = animateClose(0)
@@ -126,7 +122,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         if (drawerSheetStack.length > 0) {
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
           if (behindModalRef) {
-            behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT - offset)
+            behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
             behindModalRef.scaleX.value = animateClose(1)
             behindModalRef.borderRadius.value = animateClose(40)
             behindModalRef.showBackdrop.value = animateClose(1)
@@ -224,6 +220,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       minimize,
       modalHeight,
       showBackdrop,
+      setShouldTeleport,
     }))
 
     useEffect(() => {
@@ -234,14 +231,22 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     }, [name, ref])
 
     useEffect(() => {
-      disableSheetStackEffect.value = props.disableSheetStackEffect ? 1 : 0
-      if (backdropColor && backdropColor !== 'black') {
-        bckdropColor.value = backdropColor
+      if (drawerSheetStack.length > 0 && modalStack.length > 1) {
+        const newPrevHeights = {}
+        drawerSheetStack.forEach((modal) => {
+          newPrevHeights[modal.id] = modal.modalHeight.value
+          modal.modalHeight.value = animateClose(sizes[0])
+        })
+        setPrevHeights(newPrevHeights)
+      } else if (drawerSheetStack.length > 0 && modalStack.length === 1) {
+        drawerSheetStack.forEach((modal) => {
+          if (prevHeights[modal.id]) {
+            modal.modalHeight.value = animateClose(prevHeights[modal.id])
+          }
+        })
+        setPrevHeights({})
       }
-      if (backdropOpacity && backdropOpacity !== 0.4) {
-        bckdropOpacity.value = backdropOpacity
-      }
-    }, [backdropOpacity, backdropOpacity, props.disableSheetStackEffect])
+    }, [drawerSheetStack, modalStack])
 
     return (
       <>
@@ -270,7 +275,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
               style={[
                 styles.container,
                 props.containerStyle,
-                { bottom: offset },
+                // { paddingBottom: offset },
                 shadowStyle,
               ]}
             >
