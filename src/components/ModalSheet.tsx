@@ -31,7 +31,7 @@ export const ModalSheet = forwardRef<
       backdropOpacity,
       minimizedHeight,
       children,
-      sizes = [150, 500],
+      sizes = [100, 300, 500],
       offset = 0,
       ...props
     },
@@ -47,85 +47,22 @@ export const ModalSheet = forwardRef<
       minimumHeight,
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
-      updateModalHeight,
     } = useInternal()
-    const { MAX_HEIGHT, MODAL_SHEET_HEIGHT, HEADER_HEIGHT, SCREEN_HEIGHT } =
-      useConstants()
+    const {
+      MAX_HEIGHT,
+      MODAL_SHEET_HEIGHT,
+      HEADER_HEIGHT,
+      SCREEN_HEIGHT,
+      SWIPE_VELOCITY_THRESHOLD,
+    } = useConstants()
     const modalHeight = useSharedValue(sizes[0])
     // const dismissHeight = useDerivedValue(() => (!sizes[0] ? 0 : minimizedHeight))
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
     const [shouldTeleport, setShouldTeleport] = useState(false)
-    const gesture = Gesture.Pan()
-      .onBegin((e) => props.onGestureBegin?.(e))
-      .onStart((e) => props.onGestureStarts?.(e))
-      .onFinalize((e) => props.onGestureFinalize?.(e))
-      .onTouchesDown((e) => {
-        if (props.onGestureTouchesDown) {
-          runOnJS(props.onGestureTouchesDown)(e)
-        }
-      })
-      .onTouchesUp((e) => props.onGestureTouchesUp?.(e))
-      .onTouchesMove((e) => props.onGestureTouchesMove?.(e))
-      .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
-      .onUpdate((e) => {
-        if (props.onGestureUpdate) {
-          props.onGestureUpdate(e)
-          return
-        }
-        if (drawerActiveIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
-          return
-        } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
-          return
-        }
-        const moveVal = SCREEN_HEIGHT - e.absoluteY
-        modalHeight.value = moveVal
-        if (!disableSheetStackEffect.value && drawerActiveIndex.value === 1) {
-          updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
-        }
-        // Animate the modal behind if there is a stack of modals
-        // When the current modal is dragged, the modal behind animates with it
-        const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
-        if (behindModalRef) {
-          const val = interpolateClamp(
-            moveVal,
-            [0, MODAL_SHEET_HEIGHT],
-            [MODAL_SHEET_HEIGHT, MAX_HEIGHT + 5],
-          )
-          behindModalRef.modalHeight.value = val
-          behindModalRef.scaleX.value = interpolateClamp(
-            moveVal,
-            [sizes[0], MODAL_SHEET_HEIGHT],
-            [1, 0.96],
-          )
-        }
-      })
-      .onEnd((e) => {
-        if (props.onGestureEnd) {
-          runOnJS(props.onGestureEnd)(e)
-          return
-        }
-        if (e.translationY < 0) {
-          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
-          showBackdrop.value = animateOpen(1)
-          if (drawerActiveIndex.value === 0) {
-            updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
-          }
-          runOnJS(addDrawerSheetToStack)(name)
-        } else {
-          modalHeight.value = animateClose(sizes[0])
-          showBackdrop.value = animateClose(0)
-          updateModalHeight(animateClose(sizes[0]))
-          runOnJS(removeDrawerSheetFromStack)(name)
-        }
-      })
 
     const modalStyle = useAnimatedStyle(() => {
-      const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
-      if (behindModalRef) {
-        console.log('behindModalRef', behindModalRef.modalHeight.value)
-      }
       return {
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
         borderTopLeftRadius: borderRadius.value,
@@ -162,21 +99,10 @@ export const ModalSheet = forwardRef<
     // This function is used to expand the modal to a specific height
     // If the height is not provided, the modal will expand to its maximum height
     const expand = useCallback(
-      (full?: boolean) => {
-        console.log('pressed', drawerActiveIndex.value)
+      (index?: 1 | 2 | 'full') => {
         setShouldTeleport(true)
         showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
-        // if (disableSheetEffect !== undefined) {
-        //   disableSheetStackEffect.value = disableSheetEffect ? 1 : 0
-        // }
-        // if (height) {
-        //   modalHeight.value = animateOpen(height)
-        //   return
-        // }
-        // disableSheetStackEffect.value = 0
-        // open()
-        // modalHeight.value = animateOpen(sizes[1])
-        if (full) {
+        if (index === 'full' || !index) {
           addDrawerSheetToStack(name)
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT - offset)
           // Animate the modal behind if there is a stack of modals
@@ -190,40 +116,145 @@ export const ModalSheet = forwardRef<
           }
           return
         }
-        if (modalHeight.value === sizes[0]) {
-          modalHeight.value = animateOpen(sizes[1])
-        } else if (modalHeight.value === sizes[1]) {
-          modalHeight.value = animateOpen(sizes[2] || MODAL_SHEET_HEIGHT - offset)
-        } else {
-          modalHeight.value = animateOpen(sizes[0] + offset)
+        if (!index) {
+          modalHeight.value = animateOpen(sizes[0])
+          return
         }
+        modalHeight.value = animateOpen(sizes[index] ?? sizes[0])
       },
       [drawerSheetStack],
     )
 
     // This function is used to minimize the modal to a specific height
     // If the height is not provided, the modal will minimize to its minimized height
-    const minimize = useCallback(() => {
-      setTimeout(() => {
-        setShouldTeleport(false)
-      }, 300)
-      showBackdrop.value = animateClose(0)
-      if (drawerSheetStack.length > 0) {
-        const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
-        if (behindModalRef) {
-          behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT - offset)
-          behindModalRef.scaleX.value = animateClose(1)
-          behindModalRef.borderRadius.value = animateClose(40)
-          behindModalRef.showBackdrop.value = animateClose(1)
-        }
+    const minimize = useCallback(
+      (index?: 0 | 1 | 2) => {
+        setTimeout(() => {
+          setShouldTeleport(false)
+        }, 300)
+        showBackdrop.value = animateClose(0)
         removeDrawerSheetFromStack(name)
-      }
-      modalHeight.value = animateClose(sizes[0])
-    }, [drawerSheetStack])
+        if (drawerSheetStack.length > 0) {
+          const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
+          if (behindModalRef) {
+            behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT - offset)
+            behindModalRef.scaleX.value = animateClose(1)
+            behindModalRef.borderRadius.value = animateClose(40)
+            behindModalRef.showBackdrop.value = animateClose(1)
+          }
+        }
+        if (!index) {
+          modalHeight.value = animateClose(sizes[0])
+          return
+        }
+        modalHeight.value = animateClose(sizes[index] ?? sizes[0])
+        // if (!index) {
+        //   if (sizes[2] && modalHeight.value > sizes[2]) {
+        //     modalHeight.value = animateClose(sizes[2])
+        //   } else if (modalHeight.value > sizes[1]) {
+        //     modalHeight.value = animateClose(sizes[1])
+        //   } else {
+        //     modalHeight.value = animateClose(sizes[0])
+        //   }
+        // } else {
+        // }
+      },
+      [drawerSheetStack],
+    )
 
     const setDisableSheetStackEffect = useCallback((value: 1 | 0) => {
       disableSheetStackEffect.value = value
     }, [])
+
+    const gesture = Gesture.Pan()
+      .onBegin((e) => props.onGestureBegin?.(e))
+      .onStart((e) => props.onGestureStarts?.(e))
+      .onFinalize((e) => props.onGestureFinalize?.(e))
+      .onTouchesDown((e) => {
+        if (props.onGestureTouchesDown) {
+          runOnJS(props.onGestureTouchesDown)(e)
+        }
+      })
+      .onTouchesUp((e) => props.onGestureTouchesUp?.(e))
+      .onTouchesMove((e) => props.onGestureTouchesMove?.(e))
+      .onTouchesCancelled((e) => props.onGestureTouchesCancelled?.(e))
+      .onUpdate((e) => {
+        // if (props.onGestureUpdate) {
+        //   props.onGestureUpdate(e)
+        //   return
+        // }
+        if (drawerActiveIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
+          return
+        } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
+          return
+        }
+        const moveVal = SCREEN_HEIGHT - offset - e.absoluteY
+        modalHeight.value = moveVal
+        // Animate the modal behind if there is a stack of modals
+        // When the current modal is dragged, the modal behind animates with it
+        const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
+        if (behindModalRef) {
+          const val = interpolateClamp(
+            moveVal,
+            [0, MODAL_SHEET_HEIGHT - offset],
+            [MODAL_SHEET_HEIGHT - offset, MAX_HEIGHT - offset + 5],
+          )
+          behindModalRef.modalHeight.value = val
+          behindModalRef.scaleX.value = interpolateClamp(
+            moveVal,
+            [sizes[0], MODAL_SHEET_HEIGHT - offset],
+            [1, 0.96],
+          )
+        }
+      })
+      .onEnd((e) => {
+        const { absoluteY, velocityY, translationY } = e
+        const size0 = MAX_HEIGHT - sizes[0]
+        const size1 = MAX_HEIGHT - sizes[1]
+        const size2 = sizes[2] ? MAX_HEIGHT - sizes[2] : 0
+
+        if (translationY < 0) {
+          // Swiping up
+          if (absoluteY < size0 && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
+            console.log('here')
+            // Swipe up fast from minimized state, expand to full
+            runOnJS(expand)('full')
+          } else if (size2 && absoluteY < size2) {
+            // Swipe up fast from size[1], expand to size[2]
+            runOnJS(expand)('full')
+          } else if (absoluteY < size1) {
+            // Swipe up from minimized state, expand to size[1]
+            runOnJS(expand)(2)
+          } else if (absoluteY < size0) {
+            // Swipe up not fast enough or from other states, minimize
+            runOnJS(minimize)(1)
+          } else {
+            // Swipe up from expanded state, minimize to size[0]
+            runOnJS(minimize)(0)
+          }
+        } else {
+          // Swiping down
+          if (
+            absoluteY > MAX_HEIGHT - MODAL_SHEET_HEIGHT &&
+            velocityY > SWIPE_VELOCITY_THRESHOLD
+          ) {
+            // Swipe down fast from expanded state, minimize to size[0]
+            runOnJS(minimize)(0)
+          } else if (absoluteY > size1) {
+            // Swipe down slow to minimize to size[0]
+            runOnJS(minimize)(0)
+          } else if (size2 && absoluteY > size2) {
+            // Swipe down slow to minimize to size[1]
+            runOnJS(minimize)(1)
+          } else if (size2 && absoluteY > MAX_HEIGHT - MODAL_SHEET_HEIGHT) {
+            // Swipe down slow to minimize to size[2]
+            runOnJS(minimize)(2)
+          } else {
+            // Swipe down default to minimize to size[0]
+            runOnJS(minimize)(0)
+          }
+        }
+      })
 
     useImperativeHandle(ref, () => ({
       // open,

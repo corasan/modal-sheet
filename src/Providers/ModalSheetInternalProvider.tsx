@@ -131,8 +131,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     })
   }
 
-  console.log('drawerSheetStack', drawerSheetStack)
-
   return (
     <ModalSheetInternalContext.Provider
       value={{

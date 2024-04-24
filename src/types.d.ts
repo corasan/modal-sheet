@@ -27,7 +27,7 @@ export interface ModalSheetStackProps {
 export interface ModalSheetRef {
   open: () => void
   dismiss: () => void
-  expand: (full?: boolean, disableSheetEffect?: boolean) => void
+  expand: (index?: 0 | 1 | 'full') => void
   minimize: (height?: number) => void
   setDisableSheetStackEffect: (value: 1 | 0) => void
   scaleX: SharedValue<number>
@@ -55,7 +55,7 @@ export interface ModalSheetProps {
   onGestureTouchesUp?: (e: GestureTouchEvent) => void
   onGestureTouchesMove?: (e: GestureTouchEvent) => void
   onGestureTouchesCancelled?: (e: GestureTouchEvent) => void
-  sizes?: [number, number, number?, number?]
+  sizes?: [number, number, number?]
   offset: number
 }
 

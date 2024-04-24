@@ -38,5 +38,6 @@ export function useConstants() {
     MODAL_SHEET_HEIGHT,
     HEADER_HEIGHT: top,
     SCREEN_HEIGHT: HEIGHT,
+    SWIPE_VELOCITY_THRESHOLD: 1500,
   }
 }
