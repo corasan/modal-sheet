@@ -1,12 +1,9 @@
 import { ViewStyle } from 'react-native'
 import {
   GestureStateChangeEvent,
-  GestureTouchEvent,
-  GestureUpdateEvent,
   PanGestureHandlerEventPayload,
 } from 'react-native-gesture-handler'
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated'
-import { MutableRefObject } from 'react'
 
 export type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 

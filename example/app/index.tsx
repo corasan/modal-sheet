@@ -56,8 +56,8 @@ export default function App() {
       </ModalSheet>
       <View
         style={{
-          height: 70,
-          backgroundColor: 'red',
+          height: 65,
+          backgroundColor: 'navy',
           position: 'absolute',
           bottom: 0,
           left: 0,
