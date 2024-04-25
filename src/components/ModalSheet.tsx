@@ -57,6 +57,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const [prevHeights, setPrevHeights] = useState({})
     const translateY = useSharedValue(0)
     const contentHeight = useSharedValue(0)
+    const [initialContentHeight, setInitialContentHeight] = useState(0)
+
     const modalStyle = useAnimatedStyle(() => {
       return {
         borderTopLeftRadius: borderRadius.value,
@@ -64,6 +66,11 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       }
     })
     const containerStyle = useAnimatedStyle(() => {
+      const height =
+        contentHeight.value > initialContentHeight
+          ? contentHeight.value
+          : modalHeight.value
+
       return {
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
@@ -77,7 +84,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         ),
         transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [0, 9]),
-        height: Math.max(modalHeight.value, contentHeight.value),
+        height: Math.max(modalHeight.value, height),
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -222,8 +229,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         }
       })
 
-    const onLayoutChange = (e) => {
-      contentHeight.value = e.nativeEvent.layout.height
+    const onLayoutChange = (height: number) => {
+      contentHeight.value = height
+      setInitialContentHeight(sizes[0])
     }
 
     useImperativeHandle(ref, () => ({
