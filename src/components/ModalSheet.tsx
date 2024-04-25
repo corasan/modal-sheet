@@ -29,7 +29,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       backdropColor = 'black',
       backdropOpacity = 0.3,
       children,
-      sizes = [100, 1, 500],
+      sizes = [100, 300, 500],
       offset = 0,
       ...props
     },
@@ -56,7 +56,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const showBackdrop = useSharedValue(0)
     const [prevHeights, setPrevHeights] = useState({})
     const translateY = useSharedValue(0)
-    const contentHeight = useSharedValue(0)
+    const [contentHeight, setContentHeight] = useState(0)
     const [initialContentHeight, setInitialContentHeight] = useState(0)
 
     const modalStyle = useAnimatedStyle(() => {
@@ -66,11 +66,12 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       }
     })
     const containerStyle = useAnimatedStyle(() => {
-      const height =
-        contentHeight.value > initialContentHeight
-          ? contentHeight.value
+      const contentGrowth = contentHeight - initialContentHeight
+      const newHeight =
+        contentHeight + contentGrowth > modalHeight.value &&
+        contentHeight > modalHeight.value
+          ? modalHeight.value + contentGrowth
           : modalHeight.value
-
       return {
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
@@ -84,7 +85,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         ),
         transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [0, 9]),
-        height: Math.max(modalHeight.value, height),
+        height: newHeight,
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -102,7 +103,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
      */
     const expand = useCallback(
       (index?: 1 | 2 | 'full') => {
-        showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
+        showBackdrop.value = animateOpen(1)
         if (index === 'full' || !index) {
           translateY.value = animateOpen(offset)
           addDrawerSheetToStack(name)
@@ -118,10 +119,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           }
           return
         }
-        if (!index) {
-          modalHeight.value = animateOpen(sizes[0])
-          return
-        }
         modalHeight.value = animateOpen(sizes[index] ?? sizes[0])
       },
       [drawerSheetStack],
@@ -134,7 +131,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
      */
     const minimize = useCallback(
       (index?: 0 | 1 | 2) => {
-        showBackdrop.value = animateClose(0)
         removeDrawerSheetFromStack(name)
         if (drawerSheetStack.length > 0) {
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
@@ -146,6 +142,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           }
         }
         translateY.value = animateClose(0)
+        if (index === 0 || !index) {
+          showBackdrop.value = animateClose(0)
+        }
         if (!index) {
           modalHeight.value = animateClose(sizes[0])
           return
@@ -200,7 +199,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
             runOnJS(expand)(2)
           } else if (absoluteY < size0) {
             // Swipe up not fast enough or from other states, minimize
-            runOnJS(minimize)(1)
+            runOnJS(expand)(1)
           } else {
             // Swipe up from expanded state, minimize to size[0]
             runOnJS(minimize)(0)
@@ -229,9 +228,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         }
       })
 
-    const onLayoutChange = (height: number) => {
-      contentHeight.value = height
-      setInitialContentHeight(sizes[0])
+    const onLayoutChange = (currentHeight: number, initialHeight: number) => {
+      setContentHeight(currentHeight)
+      setInitialContentHeight(initialHeight)
     }
 
     useImperativeHandle(ref, () => ({
