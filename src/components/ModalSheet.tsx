@@ -51,9 +51,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const scaleX = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
-    const [shouldTeleport, setShouldTeleport] = useState(false)
     const [prevHeights, setPrevHeights] = useState({})
-
+    const translateY = useSharedValue(0)
     const modalStyle = useAnimatedStyle(() => {
       return {
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
@@ -62,7 +61,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         height: modalHeight.value,
       }
     })
-    const shadowStyle = useAnimatedStyle(() => {
+    const containerStyle = useAnimatedStyle(() => {
       return {
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
@@ -70,7 +69,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         shadowOffset: { width: 0, height: -6 },
         shadowRadius: 8,
         shadowOpacity: interpolateClamp(modalHeight.value, [0, sizes[0]], [0, 0.04]),
-        transform: [{ scaleX: scaleX.value }],
+        transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
+        zIndex: interpolateClamp(modalHeight.value, [sizes[0], sizes[1]], [1, 99]),
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -83,10 +83,17 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
     // This function is used to expand the modal to a specific height
     // If the height is not provided, the modal will expand to its maximum height
+    /**
+     * @param {1 | 2 | 'full'} index - The index of the size array to expand to
+     */
     const expand = useCallback(
       (index?: 1 | 2 | 'full') => {
-        setShouldTeleport(true)
         showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
+        if (drawerActiveIndex.value <= 0) {
+          translateY.value = animateOpen(offset)
+        } else {
+          translateY.value = offset
+        }
         if (index === 'full' || !index) {
           addDrawerSheetToStack(name)
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
@@ -112,12 +119,17 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
     // This function is used to minimize the modal to a specific height
     // If the height is not provided, the modal will minimize to its minimized height
+    /**
+     * @param {0 | 1 | 2} index - The index of the size array to minimize to
+     */
     const minimize = useCallback(
       (index?: 0 | 1 | 2) => {
-        setTimeout(() => {
-          setShouldTeleport(false)
-        }, 300)
         showBackdrop.value = animateClose(0)
+        if (drawerActiveIndex.value <= 0) {
+          translateY.value = animateClose(0)
+        } else {
+          translateY.value = 0
+        }
         removeDrawerSheetFromStack(name)
         if (drawerSheetStack.length > 0) {
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
@@ -220,6 +232,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       minimize,
       modalHeight,
       showBackdrop,
+      translateY,
     }))
 
     useEffect(() => {
@@ -248,48 +261,32 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     }, [drawerSheetStack, modalStack])
 
     return (
-      <>
-        {!shouldTeleport ? (
-          <Animated.View
-            style={[
-              styles.container,
-              props.containerStyle,
-              { bottom: offset },
-              shadowStyle,
-            ]}
-          >
-            <Animated.View style={[styles.permanentContainer, modalStyle]}>
-              <GestureDetector gesture={gesture}>
-                <View style={styles.handleContainer}>
-                  {!noHandle && <View style={styles.handle} />}
-                </View>
-              </GestureDetector>
-              <View style={{ flex: 1 }}>{children}</View>
-            </Animated.View>
+      <Portal hostName="modalSheet">
+        <Animated.View style={[styles.backdrop, backdropStyles]} />
+        <Animated.View
+          style={[
+            styles.container,
+            props.containerStyle,
+            { bottom: offset },
+            containerStyle,
+          ]}
+        >
+          <Animated.View style={[styles.permanentContainer, modalStyle]}>
+            <GestureDetector gesture={gesture}>
+              <View style={styles.handleContainer}>
+                {!noHandle && <View style={styles.handle} />}
+              </View>
+            </GestureDetector>
+            <View style={{ flex: 1 }}>{children}</View>
           </Animated.View>
-        ) : (
-          <Portal hostName="modalSheet">
-            <Animated.View style={[styles.backdrop, backdropStyles]} />
-            <Animated.View style={[styles.container, props.containerStyle, shadowStyle]}>
-              <Animated.View style={[styles.permanentContainer, modalStyle]}>
-                <GestureDetector gesture={gesture}>
-                  <View style={styles.handleContainer}>
-                    {!noHandle && <View style={styles.handle} />}
-                  </View>
-                </GestureDetector>
-                <View style={{ flex: 1 }}>{children}</View>
-              </Animated.View>
-            </Animated.View>
-          </Portal>
-        )}
-      </>
+        </Animated.View>
+      </Portal>
     )
   },
 )
 
 const styles = StyleSheet.create({
   permanentContainer: {
-    flex: 1,
     overflow: 'hidden',
     backgroundColor: 'transparent',
   },

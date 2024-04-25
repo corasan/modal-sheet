@@ -1,12 +1,9 @@
 import { ViewStyle } from 'react-native'
 import {
   GestureStateChangeEvent,
-  GestureTouchEvent,
-  GestureUpdateEvent,
   PanGestureHandlerEventPayload,
 } from 'react-native-gesture-handler'
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated'
-import { MutableRefObject } from 'react'
 
 export type GestureEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>
 
@@ -32,10 +29,11 @@ export interface ModalSheetStackProps {
 export interface ModalSheetRef {
   expand: (index?: 1 | 2 | 'full') => void
   minimize: (index?: 0 | 1 | 2) => void
-  scaleX: SharedValue<number>
   borderRadius: SharedValue<number>
-  modalHeight: SharedValue<number>
   showBackdrop: SharedValue<number>
+  modalHeight: SharedValue<number>
+  translateY: SharedValue<number>
+  scaleX: SharedValue<number>
   minimizedHeight?: number
   id: string
   children?: React.ReactNode

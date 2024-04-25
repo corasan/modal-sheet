@@ -167,7 +167,7 @@ export const ModalSheetStack = forwardRef<
     }, [backdropOpacity, backdropOpacity])
 
     return (
-      <Portal hostName="modalSheet">
+      <Portal hostName="modalSheetStack">
         <Animated.View style={[styles.backdrop, backdropStyles]} />
         <Animated.View
           style={[
