@@ -113,7 +113,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const addDrawerSheetToStack = (modalId: string) => {
     setDrawerSheetStack((stack) => {
       const arr = [...stack, drawerSheetRefs.current[modalId]]
-      console.log([...stack, drawerSheetRefs.current[modalId]])
       drawerActiveIndex.value = arr.length - 1
       return [...stack, drawerSheetRefs.current[modalId]]
     })
@@ -121,7 +120,11 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const removeDrawerSheetFromStack = (modalId: string) => {
     setDrawerSheetStack((stack) => {
       const arr = stack.filter((m) => m.id !== modalId)
-      drawerActiveIndex.value = arr.length - 1
+      if (arr.length === 0) {
+        drawerActiveIndex.value = 0
+      } else {
+        drawerActiveIndex.value = arr.length - 1
+      }
       return arr
     })
   }
