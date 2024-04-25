@@ -1,4 +1,4 @@
-import { PortalProvider } from '@gorhom/portal'
+import { PortalHost, PortalProvider } from '@gorhom/portal'
 import { PropsWithChildren, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
@@ -148,10 +148,12 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
       }}
     >
       <View style={styles.container}>
-        <PortalProvider rootHostName="modalSheet">
+        <PortalProvider>
           <Animated.View style={[styles.animatedContainer, childrenAanimatedStyles]}>
             {children}
           </Animated.View>
+          <PortalHost name="modalSheet" />
+          <PortalHost name="modalSheetStack" />
         </PortalProvider>
       </View>
     </ModalSheetInternalContext.Provider>
