@@ -2,6 +2,8 @@ import { ModalSheet, ModalSheetStack } from '@corasan/modal-sheet'
 import { ModalSheetRef, ModalSheetStackRef } from '@corasan/modal-sheet/types'
 import { useRef } from 'react'
 import { Button, StyleSheet, Text, View } from 'react-native'
+import { Accordion } from './Accordion'
+import { YStack } from 'tamagui'
 
 export default function App() {
   const modal1 = useRef<ModalSheetRef>(null)
@@ -24,7 +26,7 @@ export default function App() {
       />
 
       <ModalSheet name="modal1" ref={modal1} offset={70}>
-        <View style={{ flex: 1 }}>
+        <View>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 1</Text>
           </View>
@@ -65,10 +67,14 @@ export default function App() {
         }}
       />
       <ModalSheet name="modal3" ref={modal3} offset={70}>
-        <View style={{ flex: 1 }}>
+        <View>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
           </View>
+          <YStack borderWidth={1} height={120} width="100%" />
+          <Accordion>
+            <YStack bg="red" height={200} width="100%"></YStack>
+          </Accordion>
           <Button
             title="Open Modal 2"
             onPress={() => {
