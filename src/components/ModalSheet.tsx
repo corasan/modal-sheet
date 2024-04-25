@@ -89,12 +89,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const expand = useCallback(
       (index?: 1 | 2 | 'full') => {
         showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
-        if (drawerActiveIndex.value <= 0) {
-          translateY.value = animateOpen(offset)
-        } else {
-          translateY.value = offset
-        }
         if (index === 'full' || !index) {
+          translateY.value = animateOpen(offset)
           addDrawerSheetToStack(name)
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
           // Animate the modal behind if there is a stack of modals
@@ -125,11 +121,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const minimize = useCallback(
       (index?: 0 | 1 | 2) => {
         showBackdrop.value = animateClose(0)
-        if (drawerActiveIndex.value <= 0) {
-          translateY.value = animateClose(0)
-        } else {
-          translateY.value = 0
-        }
         removeDrawerSheetFromStack(name)
         if (drawerSheetStack.length > 0) {
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
@@ -140,6 +131,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
             behindModalRef.showBackdrop.value = animateClose(1)
           }
         }
+        translateY.value = animateClose(0)
         if (!index) {
           modalHeight.value = animateClose(sizes[0])
           return
