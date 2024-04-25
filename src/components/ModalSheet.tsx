@@ -17,6 +17,8 @@ import Animated, {
 import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
 import { ModalSheetProps, ModalSheetRef } from '../types'
 import { useInternal } from '../hooks/useInternal'
+import React from 'react'
+import { ModalSheetChild } from './ModalSheetChild'
 
 export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheetProps>>(
   (
@@ -53,12 +55,12 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const showBackdrop = useSharedValue(0)
     const [prevHeights, setPrevHeights] = useState({})
     const translateY = useSharedValue(0)
+    const contentHeight = useSharedValue(0)
     const modalStyle = useAnimatedStyle(() => {
       return {
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
-        height: modalHeight.value,
       }
     })
     const containerStyle = useAnimatedStyle(() => {
@@ -71,6 +73,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         shadowOpacity: interpolateClamp(modalHeight.value, [0, sizes[0]], [0, 0.04]),
         transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
         zIndex: interpolateClamp(modalHeight.value, [sizes[0], sizes[1]], [1, 99]),
+        height: Math.max(modalHeight.value, contentHeight.value),
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -89,12 +92,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const expand = useCallback(
       (index?: 1 | 2 | 'full') => {
         showBackdrop.value = animateOpen(drawerActiveIndex.value + 1)
-        if (drawerActiveIndex.value <= 0) {
-          translateY.value = animateOpen(offset)
-        } else {
-          translateY.value = offset
-        }
         if (index === 'full' || !index) {
+          translateY.value = animateOpen(offset)
           addDrawerSheetToStack(name)
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
           // Animate the modal behind if there is a stack of modals
@@ -125,11 +124,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const minimize = useCallback(
       (index?: 0 | 1 | 2) => {
         showBackdrop.value = animateClose(0)
-        if (drawerActiveIndex.value <= 0) {
-          translateY.value = animateClose(0)
-        } else {
-          translateY.value = 0
-        }
         removeDrawerSheetFromStack(name)
         if (drawerSheetStack.length > 0) {
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value - 1]
@@ -140,6 +134,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
             behindModalRef.showBackdrop.value = animateClose(1)
           }
         }
+        translateY.value = animateClose(0)
         if (!index) {
           modalHeight.value = animateClose(sizes[0])
           return
@@ -184,7 +179,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         if (translationY < 0) {
           // Swiping up
           if (absoluteY < size0 && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-            console.log('here')
             // Swipe up fast from minimized state, expand to full
             runOnJS(expand)('full')
           } else if (size2 && absoluteY < size2) {
@@ -223,6 +217,10 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           }
         }
       })
+
+    const onLayoutChange = (e) => {
+      contentHeight.value = e.nativeEvent.layout.height
+    }
 
     useImperativeHandle(ref, () => ({
       scaleX,
@@ -277,7 +275,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
                 {!noHandle && <View style={styles.handle} />}
               </View>
             </GestureDetector>
-            <View style={{ flex: 1 }}>{children}</View>
+            <ModalSheetChild onLayoutChange={onLayoutChange}>{children}</ModalSheetChild>
           </Animated.View>
         </Animated.View>
       </Portal>
@@ -289,6 +287,7 @@ const styles = StyleSheet.create({
   permanentContainer: {
     overflow: 'hidden',
     backgroundColor: 'transparent',
+    flex: 1,
   },
   container: {
     backgroundColor: 'white',
