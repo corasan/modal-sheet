@@ -13,6 +13,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated'
 import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
 import { ModalSheetProps, ModalSheetRef } from '../types'
@@ -26,9 +27,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       name,
       noHandle = false,
       backdropColor = 'black',
-      backdropOpacity = 0.4,
+      backdropOpacity = 0.3,
       children,
-      sizes = [100, 300, 500],
+      sizes = [100, 1, 500],
       offset = 0,
       ...props
     },
@@ -58,7 +59,6 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const contentHeight = useSharedValue(0)
     const modalStyle = useAnimatedStyle(() => {
       return {
-        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 99]),
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
       }
@@ -70,9 +70,13 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -6 },
         shadowRadius: 8,
-        shadowOpacity: interpolateClamp(modalHeight.value, [0, sizes[0]], [0, 0.04]),
+        shadowOpacity: interpolateClamp(
+          modalHeight.value,
+          [sizes[0], MODAL_SHEET_HEIGHT],
+          [0.05, 0.1],
+        ),
         transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
-        zIndex: interpolateClamp(modalHeight.value, [sizes[0], sizes[1]], [1, 99]),
+        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [0, 9]),
         height: Math.max(modalHeight.value, contentHeight.value),
       }
     })
@@ -103,7 +107,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
             behindModalRef.modalHeight.value = animateClose(MAX_HEIGHT + 5)
             behindModalRef.scaleX.value = animateClose(0.96)
             behindModalRef.borderRadius.value = animateClose(24)
-            behindModalRef.showBackdrop.value = animateClose(0)
+            behindModalRef.showBackdrop.value = withTiming(0, { duration: 100 })
           }
           return
         }
@@ -131,7 +135,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
             behindModalRef.modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
             behindModalRef.scaleX.value = animateClose(1)
             behindModalRef.borderRadius.value = animateClose(40)
-            behindModalRef.showBackdrop.value = animateClose(1)
+            behindModalRef.showBackdrop.value = withTiming(1, { duration: 100 })
           }
         }
         translateY.value = animateClose(0)
