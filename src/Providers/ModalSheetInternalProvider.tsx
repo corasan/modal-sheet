@@ -92,6 +92,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   }
 
   const updateModalHeight = (value: number) => {
+    'worklet'
     modalHeight.value = value
   }
 
