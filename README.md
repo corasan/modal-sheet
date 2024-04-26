@@ -25,7 +25,7 @@ function App() {
 }
 ```
 
-Use `useModalSheet` hook to open and close the modal sheet.
+Use refs to expand and minimize the modal sheet.
 
 ```tsx
 import { ModalSheet, ModalSheetRef, ModalSheetStackRef } from '@corasan/modal-sheet';
@@ -91,7 +91,7 @@ function YourComponent() {
 
 ### ModalSheet
 
-The `ModalSheet` component is a modal sheet that can be expanded and minimized. It can be used to create a drawer type of modal sheet and can be stacked on top of each other.
+The `ModalSheet` component is a modal sheet that can be expanded and minimized. It can be used to create a drawer-type of modal sheet and can be stacked on top of each other.
 
 | Name | Type | Default  | Description | Required |
 | --- | --- | --- | --- | --- |
