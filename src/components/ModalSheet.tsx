@@ -161,7 +161,12 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
           return
         }
-        const moveVal = SCREEN_HEIGHT - offset - e.absoluteY
+        let moveVal
+        if (e.translationY < 0) {
+          moveVal = SCREEN_HEIGHT - 70 - e.absoluteY
+        } else {
+          moveVal = SCREEN_HEIGHT - e.absoluteY
+        }
         modalHeight.value = moveVal
         // Animate the modal behind if there is a stack of modals
         // When the current modal is dragged, the modal behind animates with it
