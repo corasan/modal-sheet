@@ -276,7 +276,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
     return (
       <Portal hostName="modalSheet">
-        <Animated.View style={[styles.backdrop, backdropStyles]} />
+        <Animated.View style={[styles.backdrop, { bottom: offset }, backdropStyles]} />
         <Animated.View
           style={[
             styles.container,
