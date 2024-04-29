@@ -56,8 +56,8 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const showBackdrop = useSharedValue(0)
     const [prevHeights, setPrevHeights] = useState({})
     const translateY = useSharedValue(0)
-    const [contentHeight, setContentHeight] = useState(0)
-    const [extraHeight, setExtraHeight] = useState(0)
+    // const [contentHeight, setContentHeight] = useState(0)
+    // const [extraHeight, setExtraHeight] = useState(0)
 
     const modalStyle = useAnimatedStyle(() => {
       return {
@@ -66,11 +66,11 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       }
     })
     const containerStyle = useAnimatedStyle(() => {
-      const diff = -modalHeight.value + contentHeight + extraHeight
-      const newHeight =
-        extraHeight + diff > contentHeight
-          ? modalHeight.value + diff - 40
-          : modalHeight.value
+      // const diff = -modalHeight.value + contentHeight + extraHeight
+      // const newHeight =
+      //   extraHeight + diff > contentHeight
+      //     ? modalHeight.value + diff - 40
+      //     : modalHeight.value
       return {
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
@@ -84,7 +84,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         ),
         transform: [{ scaleX: scaleX.value }, { translateY: translateY.value }],
         zIndex: interpolateClamp(showBackdrop.value, [0, 1], [0, 9]),
-        height: newHeight,
+        height: modalHeight.value,
       }
     })
     const backdropStyles = useAnimatedStyle(() => {
@@ -112,7 +112,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           translateY.value = animateOpen(offset)
           addDrawerSheetToStack(name)
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
-          setContentHeight(MODAL_SHEET_HEIGHT - 40)
+          // setContentHeight(MODAL_SHEET_HEIGHT - 40)
           // Animate the modal behind if there is a stack of modals
           // When a new modal is opened, the previous modal should be moved to the back
           const behindModalRef = drawerSheetStack[drawerActiveIndex.value]
@@ -124,7 +124,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           }
           return
         }
-        setContentHeight((sizes[index] ?? sizes[0]) - 40)
+        // setContentHeight((sizes[index] ?? sizes[0]) - 40)
         modalHeight.value = animateOpen(sizes[index] ?? sizes[0])
       },
       [drawerSheetStack],
@@ -152,11 +152,11 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
           showBackdrop.value = animateClose(0)
         }
         if (!index) {
-          setContentHeight(sizes[0])
+          // setContentHeight(sizes[0])
           modalHeight.value = animateClose(sizes[0])
           return
         }
-        setContentHeight((sizes[index] ?? sizes[0]) - 40)
+        // setContentHeight((sizes[index] ?? sizes[0]) - 40)
         modalHeight.value = animateClose(sizes[index] ?? sizes[0])
       },
       [drawerSheetStack],
@@ -241,9 +241,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
         }
       })
 
-    const onLayoutChange = (height: number) => {
-      setExtraHeight(height)
-    }
+    // const onLayoutChange = (height: number) => {
+    //   setExtraHeight(height)
+    // }
 
     useImperativeHandle(ref, () => ({
       scaleX,
@@ -254,7 +254,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
       modalHeight,
       showBackdrop,
       translateY,
-      onLayoutChange,
+      // onLayoutChange,
     }))
 
     useEffect(() => {

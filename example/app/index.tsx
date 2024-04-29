@@ -73,11 +73,7 @@ export default function App() {
               <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
             </View>
             <YStack borderWidth={1} height={120} width="100%" />
-            <View
-              onLayout={(e) => {
-                modal3.current?.onLayoutChange(e.nativeEvent.layout.height)
-              }}
-            >
+            <View>
               <Accordion>
                 <YStack bg="red" height={200} width="100%"></YStack>
               </Accordion>
