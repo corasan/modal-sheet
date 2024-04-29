@@ -25,7 +25,7 @@ export default function App() {
         }}
       />
 
-      <ModalSheet name="modal1" ref={modal1} offset={70}>
+      <ModalSheet name="modal1" ref={modal1} offset={65}>
         <View>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 1</Text>
@@ -66,21 +66,23 @@ export default function App() {
           right: 0,
         }}
       />
-      <ModalSheet name="modal3" ref={modal3} offset={70}>
-        <View>
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
+      <ModalSheet name="modal3" ref={modal3} offset={65}>
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+          <View>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 3</Text>
+            </View>
+            <YStack borderWidth={1} height={120} width="100%" />
+            <View
+              onLayout={(e) => {
+                modal3.current?.onLayoutChange(e.nativeEvent.layout.height)
+              }}
+            >
+              <Accordion>
+                <YStack bg="red" height={200} width="100%"></YStack>
+              </Accordion>
+            </View>
           </View>
-          <YStack borderWidth={1} height={120} width="100%" />
-          <Accordion>
-            <YStack bg="red" height={200} width="100%"></YStack>
-          </Accordion>
-          <Button
-            title="Open Modal 2"
-            onPress={() => {
-              modal2.current?.open()
-            }}
-          />
           <Button
             title="Dismiss Modal"
             onPress={() => {
