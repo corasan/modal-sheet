@@ -37,6 +37,7 @@ export interface ModalSheetRef {
   minimizedHeight?: number
   id: string
   children?: React.ReactNode
+  onLayoutChange: (height: number) => void
 }
 export interface ModalSheetProps {
   name: string
