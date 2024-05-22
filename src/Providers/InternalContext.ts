@@ -12,7 +12,6 @@ export const ModalSheetInternalContext = createContext<ModalSheetInternalContext
   minimumHeight: { value: 0 } as SharedValue<number>,
   backdropColor: { value: 'black' } as SharedValue<string>,
   backdropOpacity: { value: 0.3 } as SharedValue<number>,
-  disableSheetStackEffect: { value: 0 } as SharedValue<number>,
   updateModalHeight: () => {},
   registerDrawerSheet: () => {},
   addDrawerSheetToStack: () => {},
