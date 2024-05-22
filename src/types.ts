@@ -37,7 +37,6 @@ export interface ModalSheetRef {
   minimizedHeight?: number
   id: string
   children?: React.ReactNode
-  // onLayoutChange: (height: number) => void
 }
 export interface ModalSheetProps {
   name: string
@@ -79,7 +78,6 @@ export interface ModalSheetContextBaseType {
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
-  disableSheetStackEffect: SharedValue<number>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },

@@ -18,8 +18,6 @@ import Animated, {
 import { animateClose, animateOpen, interpolateClamp, useConstants } from '../utils'
 import { ModalSheetProps, ModalSheetRef } from '../types'
 import { useInternal } from '../hooks/useInternal'
-import React from 'react'
-import { ModalSheetChild } from './ModalSheetChild'
 
 export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheetProps>>(
   (

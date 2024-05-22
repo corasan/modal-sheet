@@ -19,9 +19,9 @@ export default function App() {
         }}
       />
       <Button
-        title="Modal 1 - expand(full: true)"
+        title="Modal 2 - open()"
         onPress={() => {
-          modal1.current?.expand('full')
+          modal2.current?.open()
         }}
       />
 

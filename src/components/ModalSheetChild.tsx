@@ -1,10 +1,10 @@
-import React, { useRef } from 'react'
+import { useRef, isValidElement, cloneElement, Children } from 'react'
 
 export const ModalSheetChild = ({ children, onLayoutChange }) => {
   const initialHeightRef = useRef(0)
-  return React.Children.map(children, (child) => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child, {
+  return Children.map(children, (child) => {
+    if (isValidElement(child)) {
+      return cloneElement(child, {
         // @ts-ignore
         onLayout: (event) => {
           const { height } = event.nativeEvent.layout
