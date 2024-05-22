@@ -39,15 +39,11 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const minimumHeight = useSharedValue(0)
   const y = useSharedValue(MAX_HEIGHT)
   const modalHeight = useSharedValue(0)
-  const disableSheetStackEffect = useSharedValue<1 | 0>(0)
   const backdropColor = useSharedValue('black')
   const backdropOpacity = useSharedValue(0.3)
   const activeIndex = useSharedValue(0)
   const drawerActiveIndex = useSharedValue(0)
   const childrenAanimatedStyles = useAnimatedStyle(() => {
-    if (disableSheetStackEffect.value === 1) {
-      return {}
-    }
     const borderRadius = interpolateClamp(
       modalHeight.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
@@ -142,7 +138,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         minimumHeight,
         backdropColor,
         backdropOpacity,
-        disableSheetStackEffect,
         updateModalHeight,
         registerDrawerSheet,
         addDrawerSheetToStack,

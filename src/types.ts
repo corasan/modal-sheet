@@ -78,7 +78,6 @@ export interface ModalSheetContextBaseType {
   minimumHeight: SharedValue<number>
   backdropColor: SharedValue<string>
   backdropOpacity: SharedValue<number>
-  disableSheetStackEffect: SharedValue<number>
   expand: (
     name: string,
     options?: { height?: number; disableSheetEffect?: boolean },

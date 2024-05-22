@@ -25,7 +25,6 @@ export const ModalSheetStack = forwardRef<
       removeModalFromStack,
       activeIndex,
       modalStack,
-      disableSheetStackEffect,
       backdropColor: bckdropColor,
       backdropOpacity: bckdropOpacity,
       updateModalHeight,
@@ -45,9 +44,6 @@ export const ModalSheetStack = forwardRef<
         }
         const moveVal = SCREEN_HEIGHT - e.absoluteY
         modalHeight.value = moveVal
-        if (!disableSheetStackEffect.value && activeIndex.value === 1) {
-          updateModalHeight(SCREEN_HEIGHT - e.absoluteY)
-        }
         // Animate the modal behind if there is a stack of modals
         // When the current modal is dragged, the modal behind animates with it
         const behindModalRef = modalStack[activeIndex.value - 1]
@@ -65,14 +61,16 @@ export const ModalSheetStack = forwardRef<
           )
         }
       })
-      .onEnd((e) => {
-        if (e.translationY < 0) {
+      .onEnd((e) => {        
+        if (e.translationY < 80) {
           modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
           showBackdrop.value = animateOpen(1)
           if (activeIndex.value === 0) {
             updateModalHeight(animateOpen(MODAL_SHEET_HEIGHT))
           }
-          runOnJS(addModalToStack)(name)
+          if (e.absoluteY < HEADER_HEIGHT) {
+            return
+          }
         } else {
           modalHeight.value = animateClose(0)
           showBackdrop.value = animateClose(0)
@@ -102,7 +100,6 @@ export const ModalSheetStack = forwardRef<
     })
 
     const open = () => {
-      disableSheetStackEffect.value = 0
       modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT)
       showBackdrop.value = animateOpen(1)
       if (activeIndex.value === 0) {
