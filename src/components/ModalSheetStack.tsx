@@ -42,12 +42,13 @@ export const ModalSheetStack = forwardRef<
         } else if (activeIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
           return
         }
-        const moveVal = SCREEN_HEIGHT - e.absoluteY
+        const moveVal = SCREEN_HEIGHT - e.absoluteY + 4
         modalHeight.value = moveVal
         // Animate the modal behind if there is a stack of modals
         // When the current modal is dragged, the modal behind animates with it
         const behindModalRef = modalStack[activeIndex.value - 1]
         if (behindModalRef) {
+          updateModalHeight(moveVal)
           const val = interpolateClamp(
             moveVal,
             [0, MODAL_SHEET_HEIGHT],

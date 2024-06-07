@@ -47,17 +47,17 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     const borderRadius = interpolateClamp(
       modalHeight.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [0, 24],
+      [40, 14],
     )
     const scaleX = interpolateClamp(
       modalHeight.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [1, 0.95],
+      [1, 0.96],
     )
     const translateY = interpolateClamp(
       modalHeight.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [0, HEADER_HEIGHT - 5],
+      [0, HEADER_HEIGHT - 2],
     )
     return {
       borderRadius,

@@ -20,12 +20,12 @@ export function interpolateClamp(
 
 export function animateOpen(value: number) {
   'worklet'
-  return withSpring(value, { mass: 0.32, stiffness: 80 })
+  return withSpring(value, { mass: 0.30, stiffness: 90 })
 }
 
 export function animateClose(value: number) {
   'worklet'
-  return withTiming(value)
+  return withTiming(value, { duration: 250 })
 }
 
 export function useConstants() {
