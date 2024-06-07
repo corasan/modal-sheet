@@ -75,7 +75,7 @@ export default function App() {
             <YStack borderWidth={1} height={120} width="100%" />
             <View>
               <Accordion>
-                <YStack bg="red" height={200} width="100%"></YStack>
+                <YStack backgroundColor="red" height={200} width="100%"></YStack>
               </Accordion>
             </View>
           </View>
@@ -94,7 +94,7 @@ export default function App() {
         backdropOpacity={0.5}
         ref={modal2}
       >
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <View style={{ flex: 1, backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 30 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 2</Text>
           </View>
