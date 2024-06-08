@@ -3,14 +3,15 @@ import { PropsWithChildren, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
   Extrapolation,
-  SharedValue,
   interpolate,
+  useAnimatedReaction,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
 
 import { ModalSheetInternalContext } from './InternalContext'
-import { useConstants } from '../utils'
+import { animateClose, animateOpen, useConstants } from '../utils'
 import { ModalSheetRef, ModalSheetStackRef } from '../types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
@@ -18,50 +19,48 @@ function interpolateClamp(value: number, inputRange: number[], outputRange: numb
   return interpolate(value, inputRange, outputRange, Extrapolation.CLAMP)
 }
 
-const appObj: ModalSheetStackRef = {
-  id: 'app',
-  children: undefined,
-  open: () => {},
-  dismiss: () => {},
-  modalHeight: { value: 0 } as SharedValue<number>,
-  scaleX: { value: 1 } as SharedValue<number>,
-  borderRadius: { value: 0 } as SharedValue<number>,
-  showBackdrop: { value: 0 } as SharedValue<number>,
-}
-
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
-  const { MAX_HEIGHT, HEADER_HEIGHT, MODAL_SHEET_HEIGHT } = useConstants()
-  const modalRefs = useRef<Record<string, ModalSheetStackRef>>({ app: appObj })
+  const {
+    HEADER_HEIGHT,
+    MODAL_SHEET_HEIGHT,
+    DEFAULT_BORDER_RADIUS,
+    ANIMATE_BORDER_RADIUS,
+  } = useConstants()
+  const modalRefs = useRef<Record<string, ModalSheetStackRef>>({})
   const drawerSheetRefs = useRef<Record<string, ModalSheetRef>>({})
   const modalRefsObj = modalRefs.current
-  const [modalStack, setModalStack] = useState<ModalSheetStackRef[]>([appObj])
+  const [modalStack, setModalStack] = useState<ModalSheetStackRef[]>([])
   const [drawerSheetStack, setDrawerSheetStack] = useState<ModalSheetRef[]>([])
   const minimumHeight = useSharedValue(0)
-  const y = useSharedValue(MAX_HEIGHT)
+  const childrenY = useSharedValue(0)
   const modalHeight = useSharedValue(0)
   const backdropColor = useSharedValue('black')
   const backdropOpacity = useSharedValue(0.3)
-  const activeIndex = useSharedValue(0)
+  const activeIndex = useDerivedValue(() => {
+    return modalStack.length - 1
+  })
   const drawerActiveIndex = useSharedValue(0)
-  const childrenAanimatedStyles = useAnimatedStyle(() => {
+  const currentModal = useSharedValue<ModalSheetStackRef | null>(null)
+  const previousModal = useSharedValue<ModalSheetStackRef | null>(null)
+  const childrenAnimatedStyles = useAnimatedStyle(() => {
     const borderRadius = interpolateClamp(
-      modalHeight.value,
+      childrenY.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [40, 14],
+      [DEFAULT_BORDER_RADIUS, ANIMATE_BORDER_RADIUS],
     )
-    const scaleX = interpolateClamp(
-      modalHeight.value,
+    const scale = interpolateClamp(
+      childrenY.value,
       [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [1, 0.96],
+      [1, 0.95],
     )
     const translateY = interpolateClamp(
-      modalHeight.value,
-      [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [0, HEADER_HEIGHT - 2],
+      childrenY.value,
+      [0, MODAL_SHEET_HEIGHT],
+      [0, HEADER_HEIGHT - 25],
     )
     return {
       borderRadius,
-      transform: [{ scaleX }, { translateY }],
+      transform: [{ scale }, { translateY }],
     }
   })
 
@@ -84,7 +83,8 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   }
 
   const updateY = (value: number) => {
-    y.value = value
+    'worklet'
+    childrenY.value = value
   }
 
   const updateModalHeight = (value: number) => {
@@ -92,17 +92,32 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     modalHeight.value = value
   }
 
+  useAnimatedReaction(
+    () => activeIndex.value,
+    (index) => {
+      if (index === 0) {
+        updateY(animateOpen(MODAL_SHEET_HEIGHT))
+      } else if (index < 0) {
+        updateY(animateClose(0))
+      }
+      currentModal.value = modalStack[index]
+      previousModal.value = modalStack[index - 1]
+    },
+  )
+
   const addModalToStack = (modalId: string) => {
     setModalStack((stack) => {
-      const arr = [...stack, modalRefsObj[modalId]]
-      activeIndex.value = arr.length - 1
       return [...stack, modalRefsObj[modalId]]
     })
   }
   const removeModalFromStack = (modalId: string) => {
     setModalStack((stack) => {
       const arr = stack.filter((m) => m.id !== modalId)
-      activeIndex.value = arr.length - 1
+      // if (arr.length === 0) {
+      //   activeIndex.value = 0
+      // } else {
+      //   activeIndex.value = arr.length - 1
+      // }
       return arr
     })
   }
@@ -144,11 +159,14 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         removeDrawerSheetFromStack,
         drawerSheetStack,
         drawerActiveIndex,
+        childrenY,
+        currentModal,
+        previousModal,
       }}
     >
       <View style={styles.container}>
         <PortalProvider>
-          <Animated.View style={[styles.animatedContainer, childrenAanimatedStyles]}>
+          <Animated.View style={[styles.animatedContainer, childrenAnimatedStyles]}>
             {children}
           </Animated.View>
           <PortalHost name="modalSheet" />

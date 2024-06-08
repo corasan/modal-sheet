@@ -13,9 +13,10 @@ export interface ModalSheetStackRef {
   id: string
   children?: React.ReactNode
   modalHeight: SharedValue<number>
-  scaleX: SharedValue<number>
+  scale: SharedValue<number>
   borderRadius: SharedValue<number>
   showBackdrop: SharedValue<number>
+  translateY: SharedValue<number>
 }
 
 export interface ModalSheetStackProps {
@@ -85,6 +86,9 @@ export interface ModalSheetContextBaseType {
   open: (name: string) => void
   dismiss: (name?: string) => void
   updateModalHeight: (value: number) => void
+  childrenY: SharedValue<number>,
+  currentModal: SharedValue<ModalSheetStackRef | null>,
+  previousModal: SharedValue<ModalSheetStackRef | null>
 }
 
 export type ModalSheetInternalContextType = Omit<
