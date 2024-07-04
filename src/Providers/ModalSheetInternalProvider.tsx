@@ -102,12 +102,8 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   useAnimatedReaction(
     () => activeIndex.value,
     (index) => {
-      // if (index === 0) {
-      //   updateY(animateOpen(CHILDREN_Y_POSITION))
-      // } else if (index < 0) {
-      //   updateY(animateClose(0))
-      // }
       currentModal.value = modalStack[index]
+      previousModal.value = modalStack[index - 1]
     },
   )
 

@@ -30,6 +30,7 @@ export const ModalSheetStack = forwardRef<
       updateY,
       currentModal,
       modalStack,
+      previousModal,
     } = useInternal()
     const {
       MODAL_SHEET_HEIGHT,
@@ -65,6 +66,18 @@ export const ModalSheetStack = forwardRef<
           )
           updateY(y)
         }
+
+        // Animate the previous modal based on current modal gesture
+        if (previousModal.value) {
+          const prev = previousModal.value
+          prev.translateY.value = interpolateClamp(moveVal, [0, SCREEN_HEIGHT], [-12, 0])
+          prev.scale.value = interpolateClamp(moveVal, [0, SCREEN_HEIGHT], [0.92, 1])
+          prev.borderRadius.value = interpolateClamp(
+            moveVal,
+            [0, SCREEN_HEIGHT],
+            [ANIMATE_BORDER_RADIUS, DEFAULT_BORDER_RADIUS],
+          )
+        }
       })
       .onEnd((e) => {
         modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
@@ -74,13 +87,9 @@ export const ModalSheetStack = forwardRef<
           if (e.absoluteY < CHILDREN_Y_POSITION) {
             return
           }
-          if (activeIndex.value === 0) {
-            updateY(animateOpen(0))
-          }
         } else {
           translateY.value = animateClose(SCREEN_HEIGHT)
           showBackdrop.value = animateClose(0)
-          updateY(animateClose(0))
           runOnJS(removeModalFromStack)(name)
         }
       })
