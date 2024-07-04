@@ -98,6 +98,8 @@ The `ModalSheet` component is a modal sheet that can be expanded and minimized. 
 
 The `ModalSheetStack` component is a modal sheet that can be opened and dismissed. It creates a modal sheet effect similar to the iOS modal sheet.
 
+
+#### Props
 | Name | Type | Default  | Description | Required |
 | --- | --- | --- | --- | --- |
 | ref | React.RefObject\<ModalSheetStackRef> | - | Ref for the modal sheet | Yes |
