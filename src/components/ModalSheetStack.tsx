@@ -143,12 +143,27 @@ export const ModalSheetStack = forwardRef<
 
     useAnimatedReaction(
       () => currentModal.value,
-      (currentModal) => {
-        if (currentModal) {
-          currentModal.translateY.value = animateOpen(0)
-          currentModal.scale.value = animateOpen(1)
-          currentModal.borderRadius.value = animateOpen(DEFAULT_BORDER_RADIUS)
-          currentModal.showBackdrop.value = animateOpen(1)
+      (modal, prevModal) => {
+        if (modal) {
+          modal.translateY.value = animateOpen(0)
+          modal.scale.value = animateOpen(1)
+          modal.borderRadius.value = animateOpen(DEFAULT_BORDER_RADIUS)
+          modal.showBackdrop.value = animateOpen(1)
+
+          if (prevModal && modalStack.filter((m) => m.id === prevModal.id).length === 0) {
+            console.log('first if', modal?.id, prevModal?.id)
+            prevModal.translateY.value = animateClose(SCREEN_HEIGHT)
+            prevModal.showBackdrop.value = animateClose(0)
+            prevModal.scale.value = animateClose(1)
+            prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
+            return
+          } else if (prevModal) {
+            console.log('second if', modal?.id, prevModal?.id)
+            prevModal.translateY.value = animateClose(-34)
+            prevModal.scale.value = animateClose(0.95)
+            prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
+            prevModal.showBackdrop.value = animateClose(0)
+          }
         }
       },
     )

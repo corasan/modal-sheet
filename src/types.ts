@@ -86,8 +86,8 @@ export interface ModalSheetContextBaseType {
   open: (name: string) => void
   dismiss: (name?: string) => void
   updateModalHeight: (value: number) => void
-  childrenY: SharedValue<number>,
-  currentModal: SharedValue<ModalSheetStackRef | null>,
+  childrenY: SharedValue<number>
+  currentModal: SharedValue<ModalSheetStackRef | null>
   previousModal: SharedValue<ModalSheetStackRef | null>
 }
 
