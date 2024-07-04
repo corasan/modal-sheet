@@ -166,11 +166,11 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     >
       <View style={styles.container}>
         <PortalProvider>
-          <Animated.View style={[styles.animatedContainer, childrenAnimatedStyles]}>
-            {children}
-          </Animated.View>
-          <PortalHost name="modalSheet" />
-          <PortalHost name="modalSheetStack" />
+        <Animated.View style={[styles.animatedContainer, childrenAnimatedStyles]}>
+          {children}
+        </Animated.View>
+        <PortalHost name="modalSheet" />
+        <PortalHost name="modalSheetStack" />
         </PortalProvider>
       </View>
     </ModalSheetInternalContext.Provider>
