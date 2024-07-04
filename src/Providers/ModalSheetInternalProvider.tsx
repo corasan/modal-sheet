@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { ModalSheetInternalContext } from './InternalContext'
-import { animateClose, animateOpen, useConstants } from '../utils'
+import { SCREEN_HEIGHT, animateClose, animateOpen, useConstants } from '../utils'
 import { ModalSheetRef, ModalSheetStackRef } from '../types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
@@ -21,8 +21,8 @@ function interpolateClamp(value: number, inputRange: number[], outputRange: numb
 
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const {
-    HEADER_HEIGHT,
-    MODAL_SHEET_HEIGHT,
+    TOP_INSET_HEIGHT,
+    CHILDREN_Y_POSITION,
     DEFAULT_BORDER_RADIUS,
     ANIMATE_BORDER_RADIUS,
   } = useConstants()
@@ -43,24 +43,23 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const currentModal = useSharedValue<ModalSheetStackRef | null>(null)
   const previousModal = useSharedValue<ModalSheetStackRef | null>(null)
   const childrenAnimatedStyles = useAnimatedStyle(() => {
+    const interpolationInputRange = [0, TOP_INSET_HEIGHT]
+    const interpolationOutputRange = [0, CHILDREN_Y_POSITION]
     const borderRadius = interpolateClamp(
       childrenY.value,
-      [minimumHeight.value, MODAL_SHEET_HEIGHT],
+      [0, 10],
       [DEFAULT_BORDER_RADIUS, ANIMATE_BORDER_RADIUS],
     )
-    const scale = interpolateClamp(
-      childrenY.value,
-      [minimumHeight.value, MODAL_SHEET_HEIGHT],
-      [1, 0.95],
-    )
+    const scaleY = interpolateClamp(childrenY.value, interpolationInputRange, [1, 0.95])
+    const scaleX = interpolateClamp(childrenY.value, interpolationInputRange, [1, 0.9])
     const translateY = interpolateClamp(
       childrenY.value,
-      [0, MODAL_SHEET_HEIGHT],
-      [0, HEADER_HEIGHT - 25],
+      interpolationInputRange,
+      interpolationOutputRange,
     )
     return {
       borderRadius,
-      transform: [{ scale }, { translateY }],
+      transform: [{ scaleY }, { scaleX }, { translateY }],
     }
   })
 
@@ -96,30 +95,21 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     () => activeIndex.value,
     (index) => {
       if (index === 0) {
-        updateY(animateOpen(MODAL_SHEET_HEIGHT))
+        updateY(animateOpen(CHILDREN_Y_POSITION))
       } else if (index < 0) {
         updateY(animateClose(0))
       }
       currentModal.value = modalStack[index]
-      previousModal.value = modalStack[index - 1]
     },
   )
 
   const addModalToStack = (modalId: string) => {
-    setModalStack((stack) => {
-      return [...stack, modalRefsObj[modalId]]
-    })
+    setModalStack((arr) => [...arr, modalRefsObj[modalId]])
   }
   const removeModalFromStack = (modalId: string) => {
-    setModalStack((stack) => {
-      const arr = stack.filter((m) => m.id !== modalId)
-      // if (arr.length === 0) {
-      //   activeIndex.value = 0
-      // } else {
-      //   activeIndex.value = arr.length - 1
-      // }
-      return arr
-    })
+    const arr = modalStack
+    const newArr = arr.filter((m) => m.id !== modalId)
+    setModalStack(newArr)
   }
 
   const addDrawerSheetToStack = (modalId: string) => {
@@ -165,13 +155,11 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
       }}
     >
       <View style={styles.container}>
-        <PortalProvider>
         <Animated.View style={[styles.animatedContainer, childrenAnimatedStyles]}>
           {children}
         </Animated.View>
         <PortalHost name="modalSheet" />
         <PortalHost name="modalSheetStack" />
-        </PortalProvider>
       </View>
     </ModalSheetInternalContext.Provider>
   )

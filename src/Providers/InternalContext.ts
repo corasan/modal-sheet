@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { ModalSheetInternalContextType } from '../types'
+import { ModalSheetInternalContextType, ModalSheetStackRef } from '../types'
 import { SharedValue } from 'react-native-reanimated'
 
 export const ModalSheetInternalContext = createContext<ModalSheetInternalContextType>({
@@ -8,7 +8,7 @@ export const ModalSheetInternalContext = createContext<ModalSheetInternalContext
   addModalToStack: () => {},
   removeModalFromStack: () => {},
   activeIndex: { value: 0 } as SharedValue<number>,
-  modalStack: [],
+  modalStack: [] as ModalSheetStackRef[],
   minimumHeight: { value: 0 } as SharedValue<number>,
   backdropColor: { value: 'black' } as SharedValue<string>,
   backdropOpacity: { value: 0.3 } as SharedValue<number>,
@@ -18,4 +18,7 @@ export const ModalSheetInternalContext = createContext<ModalSheetInternalContext
   removeDrawerSheetFromStack: () => {},
   drawerActiveIndex: { value: 0 } as SharedValue<number>,
   drawerSheetStack: [],
+  childrenY: { value: 0 } as SharedValue<number>,
+  currentModal: { value: null } as SharedValue<ModalSheetStackRef | null>,
+  previousModal: { value: null } as SharedValue<ModalSheetStackRef | null>,
 })
