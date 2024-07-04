@@ -44,7 +44,7 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
     const {
       MAX_HEIGHT,
       MODAL_SHEET_HEIGHT,
-      HEADER_HEIGHT,
+      TOP_INSET_HEIGHT,
       SCREEN_HEIGHT,
       SWIPE_VELOCITY_THRESHOLD,
     } = useConstants()
@@ -162,9 +162,9 @@ export const ModalSheet = forwardRef<ModalSheetRef, PropsWithChildren<ModalSheet
 
     const gesture = Gesture.Pan()
       .onUpdate((e) => {
-        if (drawerActiveIndex.value > 0 && e.absoluteY <= HEADER_HEIGHT) {
+        if (drawerActiveIndex.value > 0 && e.absoluteY <= TOP_INSET_HEIGHT) {
           return
-        } else if (drawerActiveIndex.value <= 0 && e.absoluteY < HEADER_HEIGHT + 10) {
+        } else if (drawerActiveIndex.value <= 0 && e.absoluteY < TOP_INSET_HEIGHT + 10) {
           return
         }
         let moveVal
