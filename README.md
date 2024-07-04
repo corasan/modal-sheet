@@ -1,6 +1,8 @@
 > [!WARNING]
 > This package is still in development and not fully featured yet (experimental). Please use with caution.
 
+<img src="./example/assets/RocketSim_Recording_iPhone_13_Pro_6.1_2024-07-04_19.09.50.gif" height="450" />
+
 ## Installation
 
 ```bash
@@ -28,17 +30,16 @@ function App() {
 Use refs to expand and minimize the modal sheet.
 
 ```tsx
-import { ModalSheet, ModalSheetRef, ModalSheetStackRef } from '@corasan/modal-sheet';
+import { ModalSheetStackRef, ModalSheetStack } from '@corasan/modal-sheet';
 
 function YourComponent() {
-  const modalRef = useRef<ModalSheetRef>()
-  const modalSheetRef = useRef<ModalSheetRef>()
+  const modalRef = useRef<ModalSheetStackRef>()
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Butto title="Open Modal Sheet" onClick={() => modalRef.current.extend())} />
+      <Butto title="Open Modal" onClick={() => modalRef.current.open())} />
 
-      <ModalSheet ref={modalRef} name="modal-drawer" sizes={[100, 300, 600]}>
+      <ModalSheetStack ref={modalRef} name="modal-drawer">
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Text style={{ fontWeight: "500", fontSize: 18 }}>Title</Text>
@@ -54,34 +55,12 @@ function YourComponent() {
             <Button
               title="Close Modal"
               onPress={() => {
-                modalRef.current.minimize();
+                modalRef.current.dismiss();
               }}
             />
           </View>
         </View>
-      </ModalSheet>
-      <ModalSheet ref={modalSheetRef} name="modal-sheet" sizes={[100, 300, 600]}>
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Text style={{ fontWeight: "500", fontSize: 18 }}>Title</Text>
-          </View>
-
-          <View
-            style={{
-              paddingVertical: 40,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              title="Close Modal"
-              onPress={() => {
-                modalRef.current.minimize();
-              }}
-            />
-          </View>
-        </View>
-      </ModalSheet>
+      </ModalSheetStack>
     </View>
   );
 }
@@ -126,8 +105,15 @@ The `ModalSheetStack` component is a modal sheet that can be opened and dismisse
 | children | ReactNode | - | The children components | Kinda yeah |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
-| backdropColor | string | "black" | The color of the backdrop | No |
-| backdropOpacity | number | 0.4 | The opacity of the backdrop | No |
+<!-- | backdropColor | string | "black" | The color of the backdrop | No |
+| backdropOpacity | number | 0.4 | The opacity of the backdrop | No | -->
+
+#### Methods
+
+| Name | Type | Description |
+| --- | --- | --- |
+| open | () => void | Open the modal sheet |
+| dismiss | () => void | Dismiss the modal sheet |
 
 
 <!-- ## Hooks

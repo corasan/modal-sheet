@@ -1,4 +1,4 @@
-import { Dimensions } from 'react-native'
+import { Dimensions, Platform } from 'react-native'
 import {
   interpolate,
   Extrapolation,
@@ -7,7 +7,7 @@ import {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-const HEIGHT = Dimensions.get('window').height
+export const SCREEN_HEIGHT = Dimensions.get('window').height
 
 export function interpolateClamp(
   value: number,
@@ -20,24 +20,31 @@ export function interpolateClamp(
 
 export function animateOpen(value: number) {
   'worklet'
-  return withSpring(value, { mass: 0.30, stiffness: 90 })
+  return withSpring(value, { mass: 0.3, stiffness: 90 })
 }
 
 export function animateClose(value: number) {
   'worklet'
-  return withTiming(value, { duration: 250 })
+  return withTiming(value, { duration: 300 })
 }
 
 export function useConstants() {
   const { top } = useSafeAreaInsets()
-  const MAX_HEIGHT = HEIGHT - top
+  const MAX_HEIGHT = SCREEN_HEIGHT - top
   const MODAL_SHEET_HEIGHT = MAX_HEIGHT - 10
+  const DEFAULT_BORDER_RADIUS = Platform.select({ ios: 40, android: 28 }) ?? 40
+  const ANIMATE_BORDER_RADIUS = Platform.select({ ios: 24, android: 20 }) ?? 40
+  const TOP_INSET_HEIGHT = top
+  const CHILDREN_Y_POSITION = top - 10
 
   return {
     MAX_HEIGHT,
     MODAL_SHEET_HEIGHT,
-    HEADER_HEIGHT: top,
-    SCREEN_HEIGHT: HEIGHT,
+    SCREEN_HEIGHT,
+    CHILDREN_Y_POSITION,
     SWIPE_VELOCITY_THRESHOLD: 1500,
+    DEFAULT_BORDER_RADIUS,
+    ANIMATE_BORDER_RADIUS,
+    TOP_INSET_HEIGHT,
   }
 }
