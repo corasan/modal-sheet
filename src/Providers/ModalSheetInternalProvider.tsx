@@ -57,9 +57,18 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
       interpolationInputRange,
       interpolationOutputRange,
     )
+    console.log(scaleX, scaleY)
     return {
       borderRadius,
       transform: [{ scaleY }, { scaleX }, { translateY }],
+    }
+  })
+  const backdropStyles = useAnimatedStyle(() => {
+    const zIndex = interpolateClamp(activeIndex.value, [-1, 0], [-1, 1])
+    const opacity = interpolateClamp(activeIndex.value, [-1, 0], [0, 0.3])
+    return {
+      opacity,
+      zIndex,
     }
   })
 
@@ -94,11 +103,11 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   useAnimatedReaction(
     () => activeIndex.value,
     (index) => {
-      if (index === 0) {
-        updateY(animateOpen(CHILDREN_Y_POSITION))
-      } else if (index < 0) {
-        updateY(animateClose(0))
-      }
+      // if (index === 0) {
+      //   updateY(animateOpen(CHILDREN_Y_POSITION))
+      // } else if (index < 0) {
+      //   updateY(animateClose(0))
+      // }
       currentModal.value = modalStack[index]
     },
   )
@@ -155,6 +164,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
       }}
     >
       <View style={styles.container}>
+        <Animated.View style={[styles.backdrop, backdropStyles]} />
         <Animated.View style={[styles.animatedContainer, childrenAnimatedStyles]}>
           {children}
         </Animated.View>
@@ -172,11 +182,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'black',
   },
   animatedContainer: {

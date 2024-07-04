@@ -3,6 +3,7 @@ import { PropsWithChildren, forwardRef, useEffect, useImperativeHandle } from 'r
 import { View, StyleSheet } from 'react-native'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, {
+  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -28,93 +29,70 @@ export const ModalSheetStack = forwardRef<
       backdropOpacity: bckdropOpacity,
       updateY,
       currentModal,
-      previousModal,
+      modalStack,
     } = useInternal()
     const {
-      MAX_HEIGHT,
       MODAL_SHEET_HEIGHT,
-      HEADER_HEIGHT,
       SCREEN_HEIGHT,
       ANIMATE_BORDER_RADIUS,
       DEFAULT_BORDER_RADIUS,
+      TOP_INSET_HEIGHT,
+      CHILDREN_Y_POSITION,
     } = useConstants()
-    const modalHeight = useSharedValue(0)
+    const modalHeight = useSharedValue(MODAL_SHEET_HEIGHT)
     const translateY = useSharedValue(SCREEN_HEIGHT)
     const scale = useSharedValue(1)
     const borderRadius = useSharedValue(40)
     const showBackdrop = useSharedValue(0)
+    const prevGestureTouchY = useSharedValue(0)
     const gesture = Gesture.Pan()
+      .onBegin((e) => {
+        prevGestureTouchY.value = e.absoluteY
+      })
       .onUpdate((e) => {
-        if (e.absoluteY < HEADER_HEIGHT + 20) {
-          console.log('HERE')
+        if (e.absoluteY < TOP_INSET_HEIGHT + 24) {
+          modalHeight.value = animateOpen(MODAL_SHEET_HEIGHT + 6)
           return
         }
-        const moveVal = e.absoluteY - HEADER_HEIGHT - 20
+        const moveVal = e.absoluteY - prevGestureTouchY.value
         translateY.value = moveVal
-        if (activeIndex.value === 0) {
-          updateY(
-            interpolateClamp(
-              e.absoluteY,
-              [0, SCREEN_HEIGHT],
-              [MODAL_SHEET_HEIGHT, MAX_HEIGHT],
-            ),
-          )
-        }
-        // // Animate the modal behind if there is a stack of modals
-        // // When the current modal is dragged, the modal behind animates with it
-        // const behindModalRef = modalStack[activeIndex.value - 1]
 
-        if (previousModal.value) {
-          // console.log('THE PREVIOUS MODAL', previousModal.value.id)
-          // console.log(moveVal)
-          const val = interpolateClamp(
+        if (activeIndex.value === 0) {
+          const y = interpolateClamp(
             moveVal,
-            [0, HEADER_HEIGHT],
-            [MODAL_SHEET_HEIGHT, 0],
+            [0, SCREEN_HEIGHT],
+            [CHILDREN_Y_POSITION, 0],
           )
-          console.log(moveVal, val)
-          previousModal.value.translateY.value = val
-          // previousModal.value.borderRadius.value = interpolateClamp(
-          //   moveVal,
-          //   [0, MODAL_SHEET_HEIGHT],
-          //   [DEFAULT_BORDER_RADIUS, ANIMATE_BORDER_RADIUS],
-          // )
-          // previousModal.value.scale.value = interpolateClamp(
-          //   moveVal,
-          //   [0, MODAL_SHEET_HEIGHT],
-          //   [1, 0.95],
-          // )
+          updateY(y)
         }
       })
       .onEnd((e) => {
-        translateY.value = animateOpen(0)
-        // if (e.translationY < 80) {
-        //   translateY.value = animateOpen(0)
-        //   showBackdrop.value = animateOpen(1)
-        //   if (activeIndex.value === 0) {
-        //     updateY(animateOpen(SCREEN_HEIGHT))
-        //   }
-        //   if (e.absoluteY < HEADER_HEIGHT) {
-        //     return
-        //   }
-        // } else {
-        //   translateY.value = animateClose(SCREEN_HEIGHT)
-        //   showBackdrop.value = animateClose(0)
-        //   updateY(animateClose(0))
-        //   runOnJS(removeModalFromStack)(name)
-        // }
+        modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
+        if (e.translationY < 80) {
+          translateY.value = animateOpen(0)
+          showBackdrop.value = animateOpen(1)
+          if (e.absoluteY < CHILDREN_Y_POSITION) {
+            return
+          }
+          if (activeIndex.value === 0) {
+            updateY(animateOpen(0))
+          }
+        } else {
+          translateY.value = animateClose(SCREEN_HEIGHT)
+          showBackdrop.value = animateClose(0)
+          updateY(animateClose(0))
+          runOnJS(removeModalFromStack)(name)
+        }
       })
     const modalStyle = useAnimatedStyle(() => {
       return {
-        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [1, 10]),
+        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [0, 10]),
         borderTopLeftRadius: borderRadius.value,
         borderTopRightRadius: borderRadius.value,
-        height: MODAL_SHEET_HEIGHT,
-        borderWidth: 1,
-        borderColor: 'tomato',
+        height: modalHeight.value,
         transform: [
           {
-            scale: scale.value,
+            scaleX: scale.value,
           },
           {
             translateY: translateY.value,
@@ -122,24 +100,6 @@ export const ModalSheetStack = forwardRef<
         ],
       }
     })
-    const backdropStyles = useAnimatedStyle(() => {
-      return {
-        opacity: interpolateClamp(showBackdrop.value, [0, 1], [0, 0.3]),
-        zIndex: interpolateClamp(showBackdrop.value, [0, 1], [-1, 0]),
-      }
-    })
-
-    useAnimatedReaction(
-      () => previousModal.value,
-      (previousModal) => {
-        if (previousModal) {
-          previousModal.translateY.value = animateClose(-40)
-          previousModal.scale.value = animateClose(0.95)
-          previousModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
-          previousModal.showBackdrop.value = animateClose(0)
-        }
-      },
-    )
 
     useAnimatedReaction(
       () => currentModal.value,
@@ -149,21 +109,27 @@ export const ModalSheetStack = forwardRef<
           modal.scale.value = animateOpen(1)
           modal.borderRadius.value = animateOpen(DEFAULT_BORDER_RADIUS)
           modal.showBackdrop.value = animateOpen(1)
+          if (!prevModal) {
+            updateY(animateOpen(CHILDREN_Y_POSITION))
+          }
 
           if (prevModal && modalStack.filter((m) => m.id === prevModal.id).length === 0) {
-            console.log('first if', modal?.id, prevModal?.id)
             prevModal.translateY.value = animateClose(SCREEN_HEIGHT)
             prevModal.showBackdrop.value = animateClose(0)
             prevModal.scale.value = animateClose(1)
             prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
+            updateY(animateOpen(CHILDREN_Y_POSITION))
             return
           } else if (prevModal) {
-            console.log('second if', modal?.id, prevModal?.id)
-            prevModal.translateY.value = animateClose(-34)
-            prevModal.scale.value = animateClose(0.95)
+            prevModal.translateY.value = animateClose(-12)
+            prevModal.scale.value = animateClose(0.92)
             prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
             prevModal.showBackdrop.value = animateClose(0)
+            updateY(animateClose(CHILDREN_Y_POSITION + 12))
           }
+        }
+        if (!modal && prevModal) {
+          updateY(animateClose(0))
         }
       },
     )
@@ -171,13 +137,9 @@ export const ModalSheetStack = forwardRef<
     const open = () => {
       'worklet'
       addModalToStack(name)
-      translateY.value = animateOpen(0)
-      showBackdrop.value = animateOpen(1)
     }
 
     const dismiss = () => {
-      translateY.value = animateClose(SCREEN_HEIGHT)
-      showBackdrop.value = animateClose(0)
       removeModalFromStack(name)
     }
 
@@ -210,7 +172,6 @@ export const ModalSheetStack = forwardRef<
 
     return (
       <Portal hostName="modalSheetStack">
-        <Animated.View style={[styles.backdrop, backdropStyles]} />
         <Animated.View
           style={[
             styles.container,

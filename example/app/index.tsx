@@ -9,6 +9,8 @@ export default function App() {
   const modal1 = useRef<ModalSheetRef>(null)
   const modal2 = useRef<ModalSheetStackRef>(null)
   const modal3 = useRef<ModalSheetRef>(null)
+  const modal4 = useRef<ModalSheetStackRef>(null)
+  const modal5 = useRef<ModalSheetStackRef>(null)
 
   return (
     <View style={styles.container}>
@@ -87,7 +89,6 @@ export default function App() {
           />
         </View>
       </ModalSheet>
-
       <ModalSheetStack
         name="modal2"
         backdropColor="white"
@@ -98,12 +99,67 @@ export default function App() {
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 2</Text>
           </View>
+          <View>
+            <Button
+              title="Open Modal 4"
+              onPress={() => {
+                modal4.current?.open()
+              }}
+            />
+
+            <Button
+              title="Dismiss Modal"
+              onPress={() => {
+                modal2.current?.dismiss()
+              }}
+            />
+          </View>
+        </View>
+      </ModalSheetStack>
+      <ModalSheetStack
+        name="modal4"
+        backdropColor="white"
+        backdropOpacity={0.5}
+        ref={modal4}
+      >
+        <View style={{ flex: 1, backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 30 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 4</Text>
+          </View>
+          <View>
+            <Button
+              title="Open Modal 5"
+              onPress={() => {
+                modal5.current?.open()
+              }}
+            />
           <Button
             title="Dismiss Modal"
             onPress={() => {
-              modal2.current?.dismiss()
+              modal4.current?.dismiss()
             }}
           />
+          </View>
+        </View>
+      </ModalSheetStack>
+      <ModalSheetStack
+        name="modal5"
+        backdropColor="white"
+        backdropOpacity={0.5}
+        ref={modal5}
+      >
+        <View style={{ flex: 1, backgroundColor: 'white', justifyContent: 'space-between', paddingBottom: 30 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <Text style={{ fontWeight: '500', fontSize: 18 }}>Modal 5</Text>
+          </View>
+          <View>
+          <Button
+            title="Dismiss Modal"
+            onPress={() => {
+              modal5.current?.dismiss()
+            }}
+          />
+          </View>
         </View>
       </ModalSheetStack>
     </View>
