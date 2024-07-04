@@ -66,9 +66,9 @@ function YourComponent() {
 }
 ```
 
-## Props
+## Components
 
-### ModalSheet
+<!-- ### ModalSheet
 
 The `ModalSheet` component is a modal sheet that can be expanded and minimized. It can be used to create a drawer-type of modal sheet and can be stacked on top of each other.
 
@@ -82,7 +82,7 @@ The `ModalSheet` component is a modal sheet that can be expanded and minimized. 
 | sizes | number[] | [100, 300, 600] | The sizes the modal can be expanded to | No |
 | backdropColor | string | "black" | The color of the backdrop | No |
 | backdropOpacity | number | 0.4 | The opacity of the backdrop | No |
-| offset | number | 0 | Add an offset at the bottom of the modal sheet when it's minimized | No |
+| offset | number | 0 | Add an offset at the bottom of the modal sheet when it's minimized | No | -->
 <!-- | disableSheetStackEffect | boolean | - | Disable sheet stack effect | No |
 | onGestureUpdate | (e: GestureUpdateEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle gesture updates | No |
 | onGestureBegin | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture begin | No |
