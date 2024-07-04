@@ -12,7 +12,7 @@ export interface ModalSheetStackRef {
   dismiss: () => void
   id: string
   children?: React.ReactNode
-  modalHeight: SharedValue<number>
+  // modalHeight: SharedValue<number>
   scale: SharedValue<number>
   borderRadius: SharedValue<number>
   showBackdrop: SharedValue<number>
@@ -23,8 +23,9 @@ export interface ModalSheetStackProps {
   name: string
   containerStyle?: AnimatedStyle<ViewStyle>
   noHandle?: boolean
-  backdropColor?: string
-  backdropOpacity?: number
+  // backdropColor?: string
+  // backdropOpacity?: number
+  // modalBorderRadius?: number
 }
 
 export interface ModalSheetRef {
