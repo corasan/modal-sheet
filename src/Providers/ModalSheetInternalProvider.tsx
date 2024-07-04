@@ -57,7 +57,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
       interpolationInputRange,
       interpolationOutputRange,
     )
-    console.log(scaleX, scaleY)
     return {
       borderRadius,
       transform: [{ scaleY }, { scaleX }, { translateY }],

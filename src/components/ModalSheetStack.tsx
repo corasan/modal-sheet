@@ -109,23 +109,41 @@ export const ModalSheetStack = forwardRef<
           modal.scale.value = animateOpen(1)
           modal.borderRadius.value = animateOpen(DEFAULT_BORDER_RADIUS)
           modal.showBackdrop.value = animateOpen(1)
+          let prevPrevModal = modalStack[activeIndex.value - 2]
           if (!prevModal) {
             updateY(animateOpen(CHILDREN_Y_POSITION))
           }
 
           if (prevModal && modalStack.filter((m) => m.id === prevModal.id).length === 0) {
+            // When removing the current modal, animate the previous modal to it's closed position
+            // In this case, the previous modal is the one being closed
+            prevPrevModal = modalStack[activeIndex.value - 1]
             prevModal.translateY.value = animateClose(SCREEN_HEIGHT)
             prevModal.showBackdrop.value = animateClose(0)
             prevModal.scale.value = animateClose(1)
             prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
-            updateY(animateOpen(CHILDREN_Y_POSITION))
+            if (modalStack.length === 1) {
+              // When there's only one modal left, animate the children to the stacked behind position
+              updateY(animateOpen(CHILDREN_Y_POSITION))
+            }
+            if (prevPrevModal) {
+              // When removing the current modal, animate the previous modal to the stacked behind position
+              prevPrevModal.translateY.value = animateClose(-12)
+            }
             return
           } else if (prevModal) {
+            // When adding modals to the stack, animate the previous modal to the stacked behind position
             prevModal.translateY.value = animateClose(-12)
             prevModal.scale.value = animateClose(0.92)
             prevModal.borderRadius.value = animateClose(ANIMATE_BORDER_RADIUS)
             prevModal.showBackdrop.value = animateClose(0)
-            updateY(animateClose(CHILDREN_Y_POSITION + 12))
+            if (prevPrevModal) {
+              // When there are multiple modals in the stack, animate the further modal below the previous modal
+              prevPrevModal.translateY.value = animateClose(12)
+            } else {
+              // When there's only one modal in the stack, animate the children to the further below the previous modal
+              updateY(animateClose(CHILDREN_Y_POSITION + 12))
+            }
           }
         }
         if (!modal && prevModal) {
