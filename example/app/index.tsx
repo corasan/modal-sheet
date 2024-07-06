@@ -20,6 +20,7 @@ export default function App() {
         name="modal1"
         ref={modal1}
         onDismiss={() => console.log('dismissed modal1')}
+        enableDragToDismiss={false}
       >
         <View
           style={{
