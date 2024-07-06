@@ -16,7 +16,11 @@ export default function App() {
           modal1.current?.open()
         }}
       />
-      <ModalSheetStack name="modal1" ref={modal1}>
+      <ModalSheetStack
+        name="modal1"
+        ref={modal1}
+        onDismiss={() => console.log('dismissed modal1')}
+      >
         <View
           style={{
             flex: 1,
@@ -45,7 +49,11 @@ export default function App() {
           </View>
         </View>
       </ModalSheetStack>
-      <ModalSheetStack name="modal2" ref={modal2}>
+      <ModalSheetStack
+        name="modal2"
+        ref={modal2}
+        onDismiss={() => console.log('dismissed modal2')}
+      >
         <View
           style={{
             flex: 1,
@@ -73,7 +81,11 @@ export default function App() {
           </View>
         </View>
       </ModalSheetStack>
-      <ModalSheetStack name="modal5" ref={modal3}>
+      <ModalSheetStack
+        name="modal5"
+        ref={modal3}
+        onDismiss={() => console.log('dismissed modal3')}
+      >
         <View
           style={{
             flex: 1,

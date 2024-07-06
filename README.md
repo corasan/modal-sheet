@@ -107,6 +107,7 @@ The `ModalSheetStack` component is a modal sheet that can be opened and dismisse
 | children | ReactNode | - | The children components | Kinda yeah |
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
+| onDismiss | () => void | - | Callback when the modal sheet is dismissed | No |
 <!-- | backdropColor | string | "black" | The color of the backdrop | No |
 | backdropOpacity | number | 0.4 | The opacity of the backdrop | No | -->
 
