@@ -23,6 +23,7 @@ export interface ModalSheetStackProps {
   name: string
   containerStyle?: AnimatedStyle<ViewStyle>
   noHandle?: boolean
+  onDismiss?: () => void
   // backdropColor?: string
   // backdropOpacity?: number
   // modalBorderRadius?: number

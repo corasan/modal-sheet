@@ -15,7 +15,7 @@ import { useInternal } from '../hooks/useInternal'
 export const ModalSheetStack = forwardRef<
   ModalSheetStackRef,
   PropsWithChildren<ModalSheetStackProps>
->(({ name, noHandle = false, children, ...props }, ref) => {
+>(({ name, noHandle = false, children, onDismiss, ...props }, ref) => {
   const {
     registerModal,
     addModalToStack,
@@ -81,6 +81,9 @@ export const ModalSheetStack = forwardRef<
         translateY.value = animateClose(SCREEN_HEIGHT)
         showBackdrop.value = animateClose(0)
         runOnJS(removeModalFromStack)(name)
+        if (onDismiss) {
+          runOnJS(onDismiss)()
+        }
       }
     })
   const modalStyle = useAnimatedStyle(() => {
@@ -156,6 +159,7 @@ export const ModalSheetStack = forwardRef<
   }
 
   const dismiss = () => {
+    onDismiss?.()
     removeModalFromStack(name)
   }
 
