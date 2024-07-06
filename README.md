@@ -108,6 +108,7 @@ The `ModalSheetStack` component is a modal sheet that can be opened and dismisse
 | containerStyle | string | - | Styles for the modal sheet container | No |
 | noHandle | boolean | false | Hide the handle | No |
 | onDismiss | () => void | - | Callback when the modal sheet is dismissed | No |
+| enableDragToDismiss | boolean | true | Enable dragging to dismiss the modal sheet | No |
 <!-- | backdropColor | string | "black" | The color of the backdrop | No |
 | backdropOpacity | number | 0.4 | The opacity of the backdrop | No | -->
 
