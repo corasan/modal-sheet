@@ -1,6 +1,3 @@
-> [!WARNING]
-> This package is still in development and not fully featured yet (experimental). Please use with caution.
-
 <img src="./example/assets/RocketSim_Recording_iPhone_13_Pro_6.1_2024-07-04_19.09.50.gif" height="450" />
 
 ## Installation
