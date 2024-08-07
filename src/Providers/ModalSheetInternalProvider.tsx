@@ -20,12 +20,7 @@ function interpolateClamp(value: number, inputRange: number[], outputRange: numb
 }
 
 export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
-  const {
-    TOP_INSET_HEIGHT,
-    CHILDREN_Y_POSITION,
-    DEFAULT_BORDER_RADIUS,
-    ANIMATE_BORDER_RADIUS,
-  } = useConstants()
+  const { TOP_INSET_HEIGHT, CHILDREN_Y_POSITION, ANIMATE_BORDER_RADIUS } = useConstants()
   const modalRefs = useRef<Record<string, ModalSheetStackRef>>({})
   const drawerSheetRefs = useRef<Record<string, ModalSheetRef>>({})
   const modalRefsObj = modalRefs.current
@@ -48,7 +43,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     const borderRadius = interpolateClamp(
       childrenY.value,
       [0, 10],
-      [DEFAULT_BORDER_RADIUS, ANIMATE_BORDER_RADIUS],
+      [0, ANIMATE_BORDER_RADIUS],
     )
     const scaleY = interpolateClamp(childrenY.value, interpolationInputRange, [1, 0.95])
     const scaleX = interpolateClamp(childrenY.value, interpolationInputRange, [1, 0.9])
