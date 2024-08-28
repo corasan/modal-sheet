@@ -21,4 +21,5 @@ export const ModalSheetInternalContext = createContext<ModalSheetInternalContext
   childrenY: { value: 0 } as SharedValue<number>,
   currentModal: { value: null } as SharedValue<ModalSheetStackRef | null>,
   previousModal: { value: null } as SharedValue<ModalSheetStackRef | null>,
+  reset: () => {},
 })
