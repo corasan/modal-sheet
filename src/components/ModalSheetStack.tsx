@@ -29,12 +29,13 @@ export const ModalSheetStack = forwardRef<
       currentModal,
       modalStack,
       previousModal,
+      reset,
     } = useInternal()
     const {
       MODAL_SHEET_HEIGHT,
       SCREEN_HEIGHT,
       ANIMATE_BORDER_RADIUS,
-      DEFAULT_BORDER_RADIUS,
+      MODAL_SHEET_BORDER_RADIUS,
       TOP_INSET_HEIGHT,
       CHILDREN_Y_POSITION,
     } = useConstants()
@@ -59,7 +60,6 @@ export const ModalSheetStack = forwardRef<
         }
         const moveVal = e.absoluteY - prevGestureTouchY.value
         translateY.value = moveVal
-
         if (activeIndex.value === 0) {
           const y = interpolateClamp(
             moveVal,
@@ -68,7 +68,6 @@ export const ModalSheetStack = forwardRef<
           )
           updateY(y)
         }
-
         // Animate the previous modal based on current modal gesture
         if (previousModal.value) {
           const prev = previousModal.value
@@ -77,7 +76,7 @@ export const ModalSheetStack = forwardRef<
           prev.borderRadius.value = interpolateClamp(
             moveVal,
             [0, SCREEN_HEIGHT],
-            [ANIMATE_BORDER_RADIUS, DEFAULT_BORDER_RADIUS],
+            [ANIMATE_BORDER_RADIUS, MODAL_SHEET_BORDER_RADIUS],
           )
         }
       })
@@ -124,7 +123,7 @@ export const ModalSheetStack = forwardRef<
         if (modal) {
           modal.translateY.value = animateOpen(0)
           modal.scale.value = animateOpen(1)
-          modal.borderRadius.value = animateOpen(DEFAULT_BORDER_RADIUS)
+          modal.borderRadius.value = animateOpen(MODAL_SHEET_BORDER_RADIUS)
           modal.showBackdrop.value = animateOpen(1)
           let prevPrevModal = modalStack[activeIndex.value - 2]
           if (!prevModal) {
@@ -192,6 +191,10 @@ export const ModalSheetStack = forwardRef<
       // Register the modal with the context
       if (ref && 'current' in ref && ref.current) {
         registerModal(name, ref.current)
+      }
+
+      return () => {
+        reset()
       }
     }, [name, ref])
 
