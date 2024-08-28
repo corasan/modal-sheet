@@ -30,20 +30,23 @@ export function animateClose(value: number) {
 
 export function useConstants() {
   const { top } = useSafeAreaInsets()
-  const MAX_HEIGHT = SCREEN_HEIGHT - Platform.select({ ios: top, default: 5 })
-  const MODAL_SHEET_HEIGHT = MAX_HEIGHT - 10
-  const DEFAULT_BORDER_RADIUS = Platform.select({ ios: 40, android: 28, default: 40 })
+  const androidTop = Platform.OS === 'android' && top === 0 ? 24 : top
+  const topPadding = Platform.select({ ios: top, android: androidTop, default: 24 })
+  const MAX_HEIGHT = SCREEN_HEIGHT - topPadding
+  const MODAL_SHEET_HEIGHT = MAX_HEIGHT - 16
+  const MODAL_SHEET_BORDER_RADIUS = Platform.select({ ios: 40, android: 28, default: 40 })
   const ANIMATE_BORDER_RADIUS = Platform.select({ ios: 24, android: 20, default: 40 })
-  const TOP_INSET_HEIGHT = top
-  const CHILDREN_Y_POSITION = top - 10
+  const TOP_INSET_HEIGHT = topPadding
+  const CHILDREN_Y_POSITION = topPadding - 10
+  const SWIPE_VELOCITY_THRESHOLD = 1500
 
   return {
     MAX_HEIGHT,
     MODAL_SHEET_HEIGHT,
     SCREEN_HEIGHT,
     CHILDREN_Y_POSITION,
-    SWIPE_VELOCITY_THRESHOLD: 1500,
-    DEFAULT_BORDER_RADIUS,
+    SWIPE_VELOCITY_THRESHOLD,
+    MODAL_SHEET_BORDER_RADIUS,
     ANIMATE_BORDER_RADIUS,
     TOP_INSET_HEIGHT,
   }
