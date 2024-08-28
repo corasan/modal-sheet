@@ -130,6 +130,13 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     })
   }
 
+  const reset = () => {
+    modalRefs.current = {}
+    drawerSheetRefs.current = {}
+    setModalStack([])
+    setDrawerSheetStack([])
+  }
+
   return (
     <ModalSheetInternalContext.Provider
       value={{
@@ -151,6 +158,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         childrenY,
         currentModal,
         previousModal,
+        reset,
       }}
     >
       <View style={styles.container}>
