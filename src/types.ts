@@ -92,7 +92,6 @@ export interface ModalSheetContextBaseType {
   childrenY: SharedValue<number>
   currentModal: SharedValue<ModalSheetStackRef | null>
   previousModal: SharedValue<ModalSheetStackRef | null>
-  reset: () => void
 }
 
 export type ModalSheetInternalContextType = Omit<
