@@ -81,6 +81,7 @@ export const ModalSheetStack = forwardRef<
       })
       .onEnd((e) => {
         modalHeight.value = animateClose(MODAL_SHEET_HEIGHT)
+        updateY(animateClose(CHILDREN_Y_POSITION))
         if (!enableDragToDismiss) {
           return
         }
@@ -129,11 +130,7 @@ export const ModalSheetStack = forwardRef<
             updateY(animateOpen(CHILDREN_Y_POSITION))
           }
 
-          if (
-            prevModal &&
-            modalStack.length > 1 &&
-            modalStack.filter((m) => m.id === prevModal.id).length === 0
-          ) {
+          if (prevModal && modalStack.filter((m) => m.id === prevModal.id).length === 0) {
             // When removing the current modal, animate the previous modal to it's closed position
             // In this case, the previous modal is the one being closed
             prevPrevModal = modalStack[activeIndex.value - 1]
