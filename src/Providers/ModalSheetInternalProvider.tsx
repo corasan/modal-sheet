@@ -1,4 +1,4 @@
-import { PortalHost, PortalProvider } from '@gorhom/portal'
+import { PortalHost } from '@gorhom/portal'
 import { PropsWithChildren, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, {
@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { ModalSheetInternalContext } from './InternalContext'
-import { SCREEN_HEIGHT, animateClose, animateOpen, useConstants } from '../utils'
+import { useConstants } from '../utils'
 import { ModalSheetRef, ModalSheetStackRef } from '../types'
 
 function interpolateClamp(value: number, inputRange: number[], outputRange: number[]) {
@@ -38,6 +38,7 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   const currentModal = useSharedValue<ModalSheetStackRef | null>(null)
   const previousModal = useSharedValue<ModalSheetStackRef | null>(null)
   const childrenAnimatedStyles = useAnimatedStyle(() => {
+    // console.log('modalStack', modalStack)
     const interpolationInputRange = [0, TOP_INSET_HEIGHT]
     const interpolationOutputRange = [0, CHILDREN_Y_POSITION]
     const borderRadius = interpolateClamp(
@@ -67,11 +68,27 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
   })
 
   const registerModal = (modalId: string, ref: any) => {
+    if (modalRefs.current[modalId]) {
+      // Check if the modalStack contains a modal with the same id
+      const existingModalIndex = modalStack.findIndex((m) => m.id === modalId)
+
+      if (existingModalIndex !== -1) {
+        // If it exists, replace it with the new ref
+        setModalStack((prevStack) => {
+          const newStack = [...prevStack]
+          newStack[existingModalIndex] = {
+            ...ref,
+            index: existingModalIndex,
+          }
+          return newStack
+        })
+      }
+    }
+
+    // Update the modalRefs.current with the new ref
     modalRefs.current[modalId] = {
-      ...{
-        ...ref,
-        index: Object.keys(modalRefs.current).length,
-      },
+      ...ref,
+      index: Object.keys(modalRefs.current).length,
     }
   }
 
@@ -130,13 +147,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
     })
   }
 
-  const reset = () => {
-    modalRefs.current = {}
-    drawerSheetRefs.current = {}
-    setModalStack([])
-    setDrawerSheetStack([])
-  }
-
   return (
     <ModalSheetInternalContext.Provider
       value={{
@@ -158,7 +168,6 @@ export function ModalSheetInternalProvider({ children }: PropsWithChildren) {
         childrenY,
         currentModal,
         previousModal,
-        reset,
       }}
     >
       <View style={styles.container}>

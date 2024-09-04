@@ -29,7 +29,6 @@ export const ModalSheetStack = forwardRef<
       currentModal,
       modalStack,
       previousModal,
-      reset,
     } = useInternal()
     const {
       MODAL_SHEET_HEIGHT,
@@ -130,7 +129,11 @@ export const ModalSheetStack = forwardRef<
             updateY(animateOpen(CHILDREN_Y_POSITION))
           }
 
-          if (prevModal && modalStack.filter((m) => m.id === prevModal.id).length === 0) {
+          if (
+            prevModal &&
+            modalStack.length > 1 &&
+            modalStack.filter((m) => m.id === prevModal.id).length === 0
+          ) {
             // When removing the current modal, animate the previous modal to it's closed position
             // In this case, the previous modal is the one being closed
             prevPrevModal = modalStack[activeIndex.value - 1]
@@ -147,7 +150,7 @@ export const ModalSheetStack = forwardRef<
               prevPrevModal.translateY.value = animateClose(-12)
             }
             return
-          } else if (prevModal) {
+          } else if (prevModal && modalStack.length > 1) {
             // When adding modals to the stack, animate the previous modal to the stacked behind position
             prevModal.translateY.value = animateClose(-12)
             prevModal.scale.value = animateClose(0.92)
@@ -191,10 +194,6 @@ export const ModalSheetStack = forwardRef<
       // Register the modal with the context
       if (ref && 'current' in ref && ref.current) {
         registerModal(name, ref.current)
-      }
-
-      return () => {
-        reset()
       }
     }, [name, ref])
 
