@@ -1,3 +1,5 @@
+
+
 <img src="./example/assets/RocketSim_Recording_iPhone_13_Pro_6.1_2024-07-04_19.09.50.gif" height="450" />
 
 ## Installation
@@ -24,7 +26,7 @@ function App() {
 }
 ```
 
-Use refs to expand and minimize the modal sheet.
+Use refs to open and dismiss the modal sheet.
 
 ```tsx
 import { ModalSheetStackRef, ModalSheetStack } from '@corasan/modal-sheet';
@@ -86,10 +88,10 @@ The `ModalSheet` component is a modal sheet that can be expanded and minimized. 
 | onGestureEnd | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture end | No |
 | onGestureStart | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture start | No |
 | onGestureFinalize | (e: GestureStateChangeEvent\<PanGestureHandlerEventPayload>) => void| - | Custom callback to handle on gesture finalize | No |
-| onGestureTouchesDown | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch down | No |
-| onGestureTouchesUp | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch up | No |
-| onGestureTouchesMove | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch move | No |
-| onGestureTouchesCancelled | (e: GestureTouchEvent) => void| - | Custom callback to handle on gesture touch cancelled | No | -->
+| onGestureTouchesDown | (e: GestureTouchEvent) => void | - | Custom callback to handle on gesture touch down | No |
+| onGestureTouchesUp | (e: GestureTouchEvent) => void | - | Custom callback to handle on gesture touch up | No |
+| onGestureTouchesMove | (e: GestureTouchEvent) => void | - | Custom callback to handle on gesture touch move | No |
+| onGestureTouchesCancelled | (e: GestureTouchEvent) => void | - | Custom callback to handle on gesture touch cancelled | No | -->
 
 ### ModalSheetStack
 
